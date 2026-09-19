@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#174a4a">
+<title>Tholen GPS-audiotour</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;color:#173535;background:#174a4a}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#315f5b,#163d3d)}
+.card{width:min(620px,100%);background:#fff;border-radius:28px;padding:34px 24px;text-align:center;box-shadow:0 20px 60px #0005}
+.mark{font-size:42px}.kicker{letter-spacing:.16em;text-transform:uppercase;font-size:12px;font-weight:800;color:#c89d52}
+h1{font-family:Georgia,serif;font-size:clamp(36px,10vw,58px);line-height:1.02;margin:10px 0 15px}
+p{font-size:18px;line-height:1.55;color:#5c6d6d}
+.start{width:100%;border:0;border-radius:18px;padding:18px;font-size:20px;font-weight:800;color:#fff;background:#174a4a;cursor:pointer}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.info div{background:#f2efe6;border-radius:14px;padding:12px 5px;font-size:13px}.info strong{display:block;font-size:16px}
+.notice{padding:14px;border-radius:14px;background:#edf5f3;color:#355757;font-size:13px;line-height:1.45}
+.hidden{display:none}#tour{min-height:100vh;background:#f7f4ec;padding:24px}.tour-card{max-width:680px;margin:auto}
+#status{padding:14px;border-radius:14px;background:#e7f0ee;margin:15px 0}
+.point{padding:18px 0;border-bottom:1px solid #ddd}.point h2{font-family:Georgia,serif}
+.stop{font-size:12px;color:#738080;text-transform:uppercase;letter-spacing:.08em}
+</style></head><body>
+<section id="start" class="hero"><main class="card">
+<div class="mark">⚓</div><div class="kicker">Historisch Tholen</div>
+<h1>Tholen<br>GPS-audiotour</h1>
+<p>Wandel door de eeuwen heen en ontdek de verhalen achter de haven, vesting, Markt, Grote Kerk en de oude straten van Tholen.</p>
+<button class="start" onclick="startTour()">▶ Start de Tholen GPS-audiotour</button>
+<div class="info"><div><strong>12</strong>verhalen</div><div><strong>± 3 km</strong>wandelroute</div><div><strong>GPS</strong>automatisch</div></div>
+<div class="notice">📍 <strong>Locatie nodig</strong><br>De tour gebruikt je GPS om het juiste verhaal op de juiste plek automatisch te starten. Geef toestemming voor locatie wanneer je telefoon daarom vraagt.</div>
+<p style="font-size:12px;margin-bottom:0">Zet je geluid aan en houd je telefoon bij je tijdens de wandeling.</p>
+</main></section>
+<section id="tour" class="hidden"><div class="tour-card">
+<h1>De Tholen GPS-audiotour</h1><div id="status">GPS wordt gestart…</div><div id="content"></div>
+</div></section>
+<script>
+const points=[
+["De haven",51.53180,4.22390,"Hier begon het verhaal van Tholen: aan het water, waar handel, tol en scheepvaart de stad vormden."],
+["De vesting",51.53220,4.22210,"Tholen groeide uit tot een versterkte stad. Grachten, wallen en bastions beschermden de inwoners."],
+["Het oude stadhuis",51.531956,4.221502,"Na de grote stadsbrand van 1452 werd hier een nieuw stadhuis gebouwd. Het werd het bestuurlijke en rechterlijke hart van de stad."],
+["De Markt",51.53137,4.22140,"Op de Markt speelde zich eeuwenlang het dagelijks stadsleven af: handel, ambacht en ontmoetingen."],
+["Stoofstraat en meekrap",51.53135,4.22160,"Meekrap was eeuwenlang een belangrijk gewas in Zeeland. De wortel leverde de rode kleurstof die handel en nijverheid voedde."],
+["De Grote Kerk",51.53115,4.22055,"De Grote Kerk groeide mee met de stad en bewaart sporen van middeleeuwen, Reformatie en latere generaties."],
+["Het gasthuis",51.53105,4.22005,"Het Sint-Laurensgasthuis bood al in de middeleeuwen onderdak en zorg aan arme reizigers en andere hulpbehoevenden."],
+["De oude dijk",51.53080,4.22130,"Deze straten volgen de oude zeedijk. Hier beleef je hoe nauw Tholen historisch met het water verbonden was."],
+["De vestingwallen",51.53065,4.21940,"Waar nu gewandeld wordt, lag ooit militair terrein met wallen, grachten en bastions."],
+["Korenmolen De Hoop",51.53202,4.21693,"Molen De Hoop werd gebouwd in 1736. Later werd de molen verhoogd om boven de bomen voldoende wind te vangen."],
+["Het weeshuis",51.53090,4.21955,"In de Regentessestraat stond eeuwenlang een weeshuis. Het vertelt het verhaal van zorg, bestuur en het dagelijks leven in de oude stad."],
+["Terug bij het water",51.53180,4.22390,"Je bent terug bij de haven. Water, handel, verdediging en gemeenschap vormen samen het verhaal van Tholen."]
+];
+let spoken=new Set();
+function dist(a,b,c,d){const R=6371000,p=Math.PI/180,x=.5-Math.cos((c-a)*p)/2+Math.cos(a*p)*Math.cos(c*p)*(1-Math.cos((d-b)*p))/2;return 2*R*Math.asin(Math.sqrt(x))}
+function say(t){if(!speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="nl-NL";u.rate=.95;speechSynthesis.speak(u)}
+function startTour(){
+ document.getElementById("start").classList.add("hidden");document.getElementById("tour").classList.remove("hidden");
+ if(!navigator.geolocation){status.textContent="Deze browser ondersteunt geen GPS.";return}
+ status.textContent="📍 GPS wordt gestart. Geef locatie toestemming als daarom wordt gevraagd.";
+ navigator.geolocation.watchPosition(pos=>{
+  let la=pos.coords.latitude,lo=pos.coords.longitude,near=null;
+  points.forEach((p,i)=>{let d=dist(la,lo,p[1],p[2]);if(!near||d<near.d)near={p,i,d}});
+  status.textContent="📍 GPS actief · nauwkeurigheid ± "+Math.round(pos.coords.accuracy)+" m";
+  if(near.d<=25&&!spoken.has(near.i)){spoken.add(near.i);content.innerHTML='<div class="point"><div class="stop">Stop '+(near.i+1)+' van '+points.length+'</div><h2>'+near.p[0]+'</h2><p>'+near.p[3]+'</p></div>'+content.innerHTML;say(near.p[3])}
+ },e=>{status.textContent=e.code===1?"⚠️ Locatie is geweigerd. Zet Locatie voor deze website op 'Toestaan' in je browserinstellingen.":"⚠️ GPS is momenteel niet beschikbaar. Controleer of Locatie/GPS is ingeschakeld."},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+}
+</script></body></html>
