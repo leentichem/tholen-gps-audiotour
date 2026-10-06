@@ -1,0 +1,98 @@
+{
+  "stops": [
+    {
+      "nr": 1,
+      "title": "De haven",
+      "audio": "audio/{lang}/stop-01.mp3"
+    },
+    {
+      "nr": 2,
+      "title": "Praathuisje",
+      "audio": "audio/{lang}/stop-02.mp3"
+    },
+    {
+      "nr": 3,
+      "title": "Brugstraat",
+      "audio": "audio/{lang}/stop-03.mp3"
+    },
+    {
+      "nr": 4,
+      "title": "Stadhuis",
+      "audio": "audio/{lang}/stop-04.mp3"
+    },
+    {
+      "nr": 5,
+      "title": "Hoogstraat",
+      "audio": "audio/{lang}/stop-05.mp3"
+    },
+    {
+      "nr": 6,
+      "title": "Stoofstraat",
+      "audio": "audio/{lang}/stop-06.mp3"
+    },
+    {
+      "nr": 7,
+      "title": "Markt",
+      "audio": "audio/{lang}/stop-07.mp3"
+    },
+    {
+      "nr": 8,
+      "title": "Venkelstraat / Vlasmarkt / De Verwachting",
+      "audio": "audio/{lang}/stop-08.mp3"
+    },
+    {
+      "nr": 9,
+      "title": "Tiny House / Oudelandsepoort",
+      "audio": "audio/{lang}/stop-09.mp3"
+    },
+    {
+      "nr": 10,
+      "title": "Molen De Hoop / Vestingwallen",
+      "audio": "audio/{lang}/stop-10.mp3"
+    },
+    {
+      "nr": 11,
+      "title": "Grote Kerk",
+      "audio": "audio/{lang}/stop-11.mp3"
+    },
+    {
+      "nr": 12,
+      "title": "Gasthuiskapel",
+      "audio": "audio/{lang}/stop-12.mp3"
+    },
+    {
+      "nr": 13,
+      "title": "Botermarkt",
+      "audio": "audio/{lang}/stop-13.mp3"
+    },
+    {
+      "nr": 14,
+      "title": "Eendrachtsweg / oude tramlijn",
+      "audio": "audio/{lang}/stop-14.mp3"
+    },
+    {
+      "nr": 15,
+      "title": "Terug naar de haven",
+      "audio": "audio/{lang}/stop-15.mp3"
+    }
+  ],
+  "start": "Camperplaats / Jachthaven De Kogge, Contre Escarpe 6, Tholen",
+  "route": [
+    "haven",
+    "praathuisje",
+    "brugstraat",
+    "stadhuis",
+    "hoogstraat",
+    "stoofstraat",
+    "markt",
+    "venkelstraat/vlasmarkt/de verwachting",
+    "tiny house/oudelandsepoort",
+    "molen de hoop/vestingwallen",
+    "grote kerk",
+    "gasthuiskapel",
+    "botermarkt",
+    "eendrachtsweg/oude tramlijn",
+    "haven"
+  ],
+  "removed_stop": "Waterpoort"
+}

@@ -1,86 +1,214 @@
-<!doctype html>
-<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#17322f"><title>Historische Audiowandeling Tholen</title>
+﻿<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Historische Audiowandeling Tholen</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--ink:#17322f;--muted:#66716d;--paper:#f5f2eb;--white:#fff;--line:#d9d3c8;--accent:#8b6f47;--soft:#ece7dc;--shadow:0 5px 20px #17322f10}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,a{font:inherit}
-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;padding:13px max(16px,calc((100vw - 1100px)/2));box-shadow:0 2px 12px #17322f08}.brand{font:700 21px Georgia,serif}.sub{font-size:12px;color:var(--muted);margin-top:3px}.langbar{display:flex;gap:7px;overflow-x:auto;padding-top:10px;scrollbar-width:none}.langbar::-webkit-scrollbar{display:none}.lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;cursor:pointer}.lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-main{max-width:1100px;margin:auto;padding:14px 14px 100px}.hero{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}h1{font:700 30px Georgia,serif;margin:0 0 7px}.hero p{margin:0;line-height:1.55;color:#394744}.facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.fact{background:var(--soft);border-radius:999px;padding:7px 10px;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;text-decoration:none;color:inherit;font-weight:650;cursor:pointer}.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
-.mapwrap{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:auto;margin-bottom:14px;box-shadow:var(--shadow)}.mapstage{position:relative;width:100%;min-width:760px}.mapstage img{display:block;width:100%;height:auto}.mapwrap img{display:block;width:100%;height:auto}.gps-marker{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:#1976d2;border:3px solid #fff;box-shadow:0 2px 8px #0006;transform:translate(-50%,-50%);display:none;z-index:5;pointer-events:none}.gps-marker::after{content:"";position:absolute;left:50%;top:-13px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:15px solid #1976d2;filter:drop-shadow(0 1px 1px #0006)}.gps-marker.active{display:block}.gps-marker .gps-pulse{position:absolute;inset:-8px;border:2px solid #1976d2;border-radius:50%;opacity:.35;animation:gpspulse 1.6s infinite}.gps-label{position:absolute;left:20px;top:-42px;background:#fff;border:1px solid #cfd8e3;border-radius:9px;padding:5px 8px;font-size:11px;font-weight:700;color:#174a86;white-space:nowrap;box-shadow:0 2px 8px #0002}.mapwrap .mapnote{position:relative}@keyframes gpspulse{0%{transform:scale(.7);opacity:.5}70%{transform:scale(1.15);opacity:0}100%{transform:scale(1.15);opacity:0}.mapnote{padding:10px 13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.section-title{font:700 22px Georgia,serif;margin:24px 2px 8px}.stop{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin:10px 0;box-shadow:var(--shadow);scroll-margin-top:145px}.stop.active{outline:2px solid var(--accent)}.stophead{display:flex;gap:11px;align-items:flex-start}.num{width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:750;flex:none}.stoptitle{font-weight:750;font-size:17px;line-height:1.25}.small{font-size:12px;color:var(--muted);margin-top:3px}.text{margin-top:11px;line-height:1.58;white-space:pre-line}.stop-actions{margin-top:12px;display:flex;gap:7px;flex-wrap:wrap}.stop-actions .btn{padding:9px 11px;font-size:13px}.audio{display:none;margin-top:10px;width:100%}.audio.show{display:block}.audio audio{width:100%}.notice{color:#6b5835;background:#fbf6ea;border:1px solid #e6d7b7;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}.progress{height:5px;background:var(--soft);border-radius:99px;overflow:hidden;margin-top:13px}.progress>i{display:block;height:100%;width:6.67%;background:var(--accent);transition:width .25s}.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:30;padding:9px max(12px,calc((100vw - 1100px)/2));display:flex;gap:8px;align-items:center;box-shadow:0 -4px 18px #17322f12}.bottom .now{flex:1;min-width:0}.bottom .now strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.bottom .now span{font-size:11px;color:var(--muted)}.bottom button{border:0;background:var(--ink);color:#fff;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}.bottom button:disabled{opacity:.35}footer{text-align:center;color:var(--muted);font-size:11px;padding:15px 0 20px}
-@media(max-width:600px){header{padding-left:12px;padding-right:12px}main{padding-left:10px;padding-right:10px}.hero{padding:16px}h1{font-size:26px}.stop{padding:13px}.mapwrap{border-radius:16px}.mapstage{min-width:700px}}
-</style></head><body>
-<header><div class="brand" id="brand">Historische Audiowandeling Tholen</div><div class="sub" id="subtitle"></div><div class="langbar" id="langbar"></div></header>
-<main><section class="hero"><h1 id="title"></h1><p id="intro"></p><div class="facts"><span class="fact">15 haltes</span><span class="fact">GPS-route</span><span class="fact">± 3 km</span><span class="fact">offline kaart</span></div><div class="actions"><a class="btn" href="Gps_Audio_Stadswandeling_.gpx" download>GPX downloaden</a><button class="btn primary" id="startBtn">Start wandeling + GPS</button><button class="btn" id="mapBtn">Routekaart</button></div><div class="progress"><i id="progress"></i></div><div class="notice" id="notice"></div><div class="notice" id="gpsStatus">GPS nog niet gestart. Tik op “Start wandeling + GPS” om GPS te activeren.</div></section>
-<div class="mapwrap" id="map"><div class="mapstage"><img src="routekaart_offline.png" alt="Wandelkaart van de historische stadswandeling in Tholen"><div id="gpsMarker" class="gps-marker"><span class="gps-pulse"></span><span class="gps-label">Jouw positie</span></div></div><div class="mapnote">De routekaart gebruikt de door jou aangeleverde GPS-track en de 15 door jou geplaatste haltes.</div></div>
-<h2 class="section-title" id="stopsTitle"></h2><section id="stops"></section><footer>Historische Audiowandeling Tholen · Waterpoort is niet als aparte halte opgenomen.</footer></main>
-<div class="bottom"><div class="now"><strong id="nowTitle"></strong><span id="nowSub"></span></div><button id="prevBtn">‹</button><button id="nextBtn">›</button></div>
+:root{--ink:#17322f;--paper:#f7f4ed;--line:#d8d1c4;--accent:#8b6f47;--white:#fff}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:18px 18px 12px;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}
+.brand{font-family:Georgia,serif;font-size:22px;font-weight:700}.sub{font-size:13px;opacity:.72;margin-top:3px}
+.langbar{display:flex;gap:7px;overflow:auto;padding:12px 0 2px;scrollbar-width:none}.langbar::-webkit-scrollbar{display:none}
+.lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;cursor:pointer}
+.lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+main{max-width:1100px;margin:auto;padding:14px}
+.hero{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+h1{font-family:Georgia,serif;margin:0 0 7px;font-size:28px}.hero p{margin:0;line-height:1.55}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;text-decoration:none;color:inherit;font-weight:600;cursor:pointer}
+#map{height:56vh;min-height:380px;border-radius:18px;border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:9px 0}
+.stophead{display:flex;gap:11px;align-items:flex-start}.num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.stoptitle{font-weight:750;font-size:16px}.small{font-size:13px;opacity:.7;margin-top:3px}
+.stop-actions{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}.play{background:var(--ink);color:#fff;border:0}
+footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
+.leaflet-popup-content{font-family:system-ui,sans-serif}.marker{background:var(--ink);color:#fff;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px #0004;font-weight:700}
+@media(min-width:800px){.hero{padding:24px}h1{font-size:34px}}
+.audio-player audio{display:block}
+.flag{width:22px;height:15px;display:inline-block;border:1px solid #aaa;border-radius:2px;overflow:hidden;position:relative;flex:none}
+.flag.nl{background:linear-gradient(to bottom,#ae1c28 0 33%,#fff 33% 66%,#21468b 66%)}
+.flag.en{background:#fff}.flag.en:before{content:'';position:absolute;left:9px;top:0;width:4px;height:100%;background:#c8102e}.flag.en:after{content:'';position:absolute;left:0;top:5px;width:100%;height:4px;background:#c8102e}
+.flag.de{background:linear-gradient(to bottom,#000 0 33%,#dd0000 33% 66%,#ffce00 66%)}
+.flag.fr{background:linear-gradient(to right,#0055a4 0 33%,#fff 33% 66%,#ef4135 66%)}
+.flag.it{background:linear-gradient(to right,#009246 0 33%,#fff 33% 66%,#ce2b37 66%)}
+.flag.es{background:linear-gradient(to bottom,#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)}
+.flag.pt{background:linear-gradient(to right,#046a38 0 40%,#da291c 40%)}.flag.pt:after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-radius:50%;background:#f5c242}
+.flag.da{background:#c8102e}.flag.da:before,.flag.da:after{content:'';position:absolute;background:#fff}.flag.da:before{left:7px;top:0;width:3px;height:100%}.flag.da:after{left:0;top:6px;width:100%;height:3px}
+.flag.no{background:#ba0c2f}.flag.no:before,.flag.no:after{content:'';position:absolute;background:#fff}.flag.no:before{left:7px;top:0;width:6px;height:100%}.flag.no:after{left:0;top:5px;width:100%;height:6px;background:#00205b}
+.flag.sv{background:#006aa7}.flag.sv:before,.flag.sv:after{content:'';position:absolute;background:#fecc00}.flag.sv:before{left:6px;top:0;width:4px;height:100%}.flag.sv:after{left:0;top:5px;width:100%;height:4px}
+.flag.pl{background:linear-gradient(to bottom,#fff 0 50%,#dc143c 50%)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Historische Audiowandeling Tholen</div>
+  <div class="sub" id="subtitle">15 haltes · route opgenomen met GPS</div>
+  <div class="langbar" id="langbar"></div>
+</header>
+<main>
+  <section class="hero">
+    <h1 id="title">Tholen door de tijd</h1>
+    <p id="intro">Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.</p>
+    <div class="actions">
+      <a class="btn" href="Gps_Audio_Stadswandeling_.gpx" download>GPX downloaden</a>
+      <button class="btn" id="fit">Route volledig tonen</button>
+    </div>
+  </section>
+  <div id="map"></div>
+  <section id="stops"></section>
+</main>
+<footer>De routekaart is gebaseerd op de aangeleverde GPS-opname.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="route-map-data.js"></script>
+<script src="teksten-data.js"></script>
 <script>
-const LANGS=[['nl','Nederlands','nl-NL'],['en','English','en-US'],['de','Deutsch','de-DE'],['fr','Français','fr-FR'],['it','Italiano','it-IT'],['es','Español','es-ES'],['pt','Português','pt-PT'],['da','Dansk','da-DK'],['no','Norsk','nb-NO'],['sv','Svenska','sv-SE'],['pl','Polski','pl-PL']];
-const UI={nl:['Tholen door de tijd','Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.','Nederlands · 15 haltes','Haltes','Vorige','Volgende','Audio','Navigatie','Tekst kopiëren','Halte','Deze versie bevat de volledige Nederlandse teksten en is voorbereid op de 15 Nederlandse MP3-bestanden.'],en:['Tholen through time','Follow the recorded route and discover the historic town, stop by stop.','English · 15 stops','Stops','Previous','Next','Audio','Navigation','Copy text','Stop','English narration is not yet included in this package. Dutch remains available.'],de:['Tholen durch die Zeit','Folgen Sie der aufgezeichneten Route und entdecken Sie die historische Altstadt.','Deutsch · 15 Stationen','Stationen','Zurück','Weiter','Audio','Navigation','Text kopieren','Station','Die deutsche Fassung ist noch nicht in diesem Paket enthalten.'],fr:['Tholen à travers le temps','Suivez l’itinéraire enregistré et découvrez la ville historique, étape par étape.','Français · 15 étapes','Étapes','Précédent','Suivant','Audio','Navigation','Copier le texte','Étape','La version française n’est pas encore incluse dans ce paquet.'],it:['Tholen nel tempo','Segui il percorso registrato e scopri il centro storico, tappa dopo tappa.','Italiano · 15 tappe','Tappe','Indietro','Avanti','Audio','Navigazione','Copia testo','Tappa','La versione italiana non è ancora inclusa in questo pacchetto.'],es:['Tholen a través del tiempo','Sigue la ruta registrada y descubre el centro histórico, parada por parada.','Español · 15 paradas','Paradas','Anterior','Siguiente','Audio','Navegación','Copiar el texto','Parada','La versión española aún no está incluida en este paquete.'],pt:['Tholen através do tempo','Siga o percurso registado e descubra o centro histórico, paragem a paragem.','Português · 15 paragens','Paragens','Anterior','Seguinte','Áudio','Navegação','Copiar texto','Paragem','A versão portuguesa ainda não está incluída neste pacote.'],da:['Tholen gennem tiden','Følg den registrerede rute og oplev den historiske by, stop for stop.','Dansk · 15 stop','Stop','Forrige','Næste','Lyd','Navigation','Kopiér tekst','Stop','Den danske lydversion er ikke inkluderet i denne pakke endnu.'],no:['Tholen gjennom tidene','Følg den registrerte ruten og oppdag den historiske byen, stopp for stopp.','Norsk · 15 stopp','Stopp','Forrige','Neste','Lyd','Navigasjon','Kopier tekst','Stopp','Den norske versjonen er ikke inkludert i denne pakken ennå.'],sv:['Tholen genom tiderna','Följ den inspelade rutten och upptäck den historiska staden, stopp för stopp.','Svenska · 15 stopp','Stopp','Föregående','Nästa','Ljud','Navigering','Kopiera text','Stopp','Den svenska versionen ingår inte i detta paket ännu.'],pl:['Tholen na przestrzeni dziejów','Podążaj zarejestrowaną trasą i odkrywaj historyczne centrum, przystanek po przystanku.','Polski · 15 przystanków','Przystanki','Poprzedni','Następny','Audio','Nawigacja','Kopiuj tekst','Przystanek','Polska wersja nie jest jeszcze zawarta w tym pakiecie.']};
-const STOPS=["De haven / Camperplaats De Kogge", "Praathuisje", "Brugstraat", "Stadhuis", "Hoogstraat", "Stoofstraat", "Markt", "Venkelstraat / Vlasmarkt / Molen De Verwachting", "Tiny House / Oudelandsepoort", "Molen De Hoop / Regentessestraat", "Grote Kerk", "Gasthuiskapel", "Botermarkt", "Eendrachtsweg / oude tramlijn", "Terug naar de haven"]; const POINTS=[[51.531853, 4.223935], [51.53234060552339, 4.224591055265352], [51.53235504549177, 4.222455522146222], [51.531995, 4.221661], [51.531736, 4.22189], [51.531403, 4.221491], [51.53150309227743, 4.220540506122532], [51.53049952058785, 4.219449527350658], [51.530716, 4.218489], [51.531872, 4.217208], [51.53169803080691, 4.218846007194282], [51.532004, 4.220584], [51.53234782550758, 4.221596666695778], [51.53267272285792, 4.222374279043639], [51.53201, 4.223925]]; const NL_TEXTS=["Rustig havenwater. Zachte wind. Meeuwen op afstand. Laat de omgeving eerst even spreken.\n\nWelkom in Tholen.\n\nNeem eerst even niets in je op. Kijk naar het water. Luister naar de meeuwen. Naar het zachte geluid van masten, lijnen en water tegen de kade.\n\nHier begint onze wandeling, bij de haven.\n\nWater is voor Tholen altijd meer geweest dan alleen een mooi uitzicht. Het bepaalde waar de stad lag, hoe mensen reisden en waarvan ze leefden. Schepen kwamen hier aan met vis, schelpdieren en goederen. En buiten de stad lagen de plekken waar oesters en mosselen werden gekweekt.\n\nDe oestercultuur verdween in de twintigste eeuw uiteindelijk uit dit gebied. De strenge winter van 1962 op 1963 veroorzaakte een enorme sterfte onder de oesters. Door de lange tijd die nodig was om nieuwe oesters op te kweken, en door veranderende omstandigheden in het water, was herstel niet meer rendabel.\n\nOok de mosselcultuur veranderde ingrijpend. De Deltawerken en de Oesterdam veranderden de waterbeweging en het zoutgehalte in dit deel van de Oosterschelde.\n\nToch bleef de relatie met het water bestaan.\n\nDe huidige haven werd in 1826 aangelegd in een oude, zoute vestinggracht, na overstromingen in 1808 en 1825. De haven die je nu ziet is dus zelf al een stukje stadsverandering.\n\n\nKijk nog één keer om je heen.\n\nJe ziet een rustige haven. Maar onder dat rustige oppervlak ligt een verhaal van werken, wachten, varen, stormen en aanpassen.\n\nLoop vanaf hier richting het Praathuisje. Houd daarbij de haven aan je rechterzijde.", "Je staat nu bij het Praathuisje.\n\nEen klein gebouwtje, maar deze plek vertelt een groot verhaal. Volgens de gemeentelijke wandelroute kwamen hier oudere inwoners bij elkaar om het laatste nieuws uit te wisselen.\n\nJe staat hier bovendien op een bijzondere plek aan de rand van de oude stad. Tholen kreeg in 1366 stadsrechten en werd daarna versterkt met muren, poorten en vesten. Later, tijdens de Tachtigjarige Oorlog, werd de verdediging opnieuw uitgebouwd tot een groter stelsel van wallen, grachten en bolwerken.\n\nProbeer je voor te stellen hoe anders deze plek er toen uitzag. Geen rustige wandelroute, maar een duidelijke grens tussen de stad en het land en water eromheen.\n\nHet Praathuisje heeft nu weer een heel andere functie. Een plek om even te staan, elkaar te ontmoeten en verhalen uit te wisselen.\n\nEn dat is precies wat wij nu ook gaan doen: al lopend de verhalen van Tholen verzamelen.\n\nLoop vanaf hier naar de overkant van de dijk, bij het Praathuisje. Neem daar de trap en loop rechtdoor de oude Brugstraat in.", "Stel je voor dat dit jouw straat is.\n\nJe woont hier. Je kent de buren. Je weet welke deur altijd vroeg opengaat, waar iemand aan het werk is en waar kinderen op straat spelen.\n\nDe Brugstraat is zo'n straat waarin je de geschiedenis niet alleen in monumenten ziet, maar vooral in de schaal van de huizen.\n\nKijk bijvoorbeeld naar nummer 16. Een fors achttiende-eeuws herenhuis, met een hardstenen stoep en een opvallende voordeur. Het gebouw heeft in de afgelopen eeuwen verschillende levens gehad: distributiekantoor, verenigingsgebouw, school en uiteindelijk weer woonhuis.\n\nEven verder zie je andere herinneringen aan het dagelijks leven. Nummer 3 was ooit een koetshuis. Nummer 23 heeft een veel oudere kern.\n\nMaar probeer niet alleen naar de grote huizen te kijken.\n\nLet op voordeuren. Op stoepen. Op ramen. Op de afstand tussen de huizen.\n\nAchter iedere gevel zat ooit een huishouden met zijn eigen ritme. Mensen gingen werken, maakten ruzie, kregen kinderen, werden ziek, vierden feest en maakten plannen voor morgen.\n\nDat maakt een oude straat interessant.\n\nNiet alleen omdat de stenen oud zijn, maar omdat hier al die tijd gewoon geleefd is.\n\n\nKijk even naar de straat alsof je hier morgen weer terugkomt.\n\nLoop verder tot je aan de Hoogstraat komt. Daar staat het stadhuis.", "Voor je staat het oude stadhuis van Tholen.\n\nMaar voordat je naar de gevel kijkt, moet je terug naar één dag: 16 mei 1452.\n\nOp die dag brak een enorme stadsbrand uit. Ongeveer vijf zesde van de huizen werd verwoest. Ook het gasthuis, het stadhuis en verschillende poorten gingen verloren.\n\nStel je de paniek voor.\n\nEen middeleeuwse stad met veel houten onderdelen, daken dicht op elkaar en nauwelijks middelen om een grote brand te stoppen.\n\nEn toch kwam er een nieuw stadhuis.\n\nRond 1460 verrees hier het gebouw dat, in aangepaste vorm, nog altijd voor je staat. De gevel kreeg acht voetsteunen en baldakijnen. De beelden die daar ooit gedacht waren, kwamen er uiteindelijk niet.\n\nKijk ook naar het stenen bordes. Dat werd in 1758 gemaakt door Nicolaas Muts uit Middelburg.\n\nHier werd bestuurd, rechtgesproken en beslist over het dagelijks leven van de stad. Voor het stadhuis werden ook misdadigers berecht. Het laatste doodvonnis werd hier in 1750 met het zwaard voltrokken.\n\nEn dan is er het carillon.\n\nIn het torentje hangen 37 klokken. Een van de oudste beiaardklokken van Nederland dateert uit 1458. Negen andere klokken zijn uit 1627.\n\n\nAls je geluk hebt, hoor je straks het kwartier.\n\nDit gebouw vertelt eigenlijk één groot verhaal: een stad kan zwaar getroffen worden en toch opnieuw beginnen.\n\nLoop nu de Hoogstraat in. Kijk onderweg vooral omhoog.", "Kijk eens naar de huizen in deze straat.\n\nSommige gevels zijn groot en statig. Andere zijn veel eenvoudiger. Samen laten ze zien hoe verschillend het leven in Tholen kon zijn.\n\nBij nummer 13 en 15 staat een fors huis uit ongeveer 1790. De vorm en versiering verraden de smaak van een welgestelde opdrachtgever.\n\nEn dit huis heeft nog een bijzondere herinnering.\n\nIn 1809 overnachtte hier Lodewijk Napoleon, koning van Holland.\n\nStel je dat even voor: een koninklijk rijtuig in deze straat, mensen die naar buiten kijken, nieuwsgierigheid achter de ramen. Voor één dag kreeg de gewone Hoogstraat iets koninklijks.\n\nMaar daarna ging het leven gewoon verder.\n\nDat is misschien wel het leukste aan historische huizen. Ze zijn niet alleen verbonden met grote namen. Ze waren vooral het decor van gewone levens.\n\nEen winkelier die vroeg de luiken opende. Een ambachtsman die naar zijn werk ging. Een gezin dat boven woonde. Iemand die 's avonds nog even naar de buren liep.\n\n\nKijk daarom niet alleen naar het mooiste huis.\n\nKijk naar de hele straat.\n\nLoop verder en sla de Stoofstraat in.", "De naam Stoofstraat vertelt je hier eigenlijk al iets.\n\nIn deze omgeving stond waarschijnlijk al na 1380 een meestoof.\n\nMeekrap — Rubia tinctorum — was eeuwenlang belangrijk voor de streek. De wortels van de plant werden verwerkt tot een rood poeder. Daarmee konden onder andere wollen stoffen worden geverfd.\n\nRood was hier dus niet zomaar een kleur.\n\nHet was werk.\n\nBoeren verbouwden de meekrap. De wortels werden geoogst en naar de meestoof gebracht. Daar begon een intensief proces van drogen, bewerken en malen.\n\nJe kunt je de straat bijna voorstellen met karren vol wortels, mensen die sjouwen en de geur van een werkplaats.\n\nKijk bij nummer 5 en 7 naar de oude trapgevels. Deze zeventiende-eeuwse panden geven de straat een bijzonder gezicht.\n\nDe meekraphandel verdween uiteindelijk toen nieuwe kleurstoffen steeds belangrijker werden. De gebouwen bleven echter staan.\n\n\nZo werkt een historische straat vaak.\n\nHet werk verdwijnt.\n\nDe stenen blijven.\n\nEn als je weet waar je naar kijkt, kunnen die stenen het oude verhaal opnieuw vertellen.\n\nLoop door richting de Markt.", "Dit is de plek waar je even de geluiden van het oude Tholen kunt voorstellen.\n\nPaardenhoeven. Een kar over de stenen. Een smid. Stemmen van mensen die elkaar ontmoeten.\n\nKijk naar de dubbele travalje, de oude hoefstal. Hier kon een paard worden vastgezet terwijl de hoefsmid zijn werk deed.\n\nEn kijk eens naar de blauwe steen in het plaveisel.\n\nDaar werd vroeger een gloeiend hete ijzeren velg op gelegd. Die velg ging rond een houten wagenwiel. Daarna werd er water overheen gegoten. Door het afkoelen trok het ijzer strak om het hout.\n\nEen klein stukje techniek, midden op straat.\n\nAan de Markt staat ook de rooms-katholieke kerk uit 1900. Binnen is het interieur rijk beschilderd. Het altaardoek werd gemaakt door schilder Huib Luns.\n\nEn dan is er de kiosk.\n\nHier ging het niet om handel of bestuur, maar om muziek en ontmoeting. Even blijven staan. Een praatje maken. Kijken wie er nog meer op de Markt was.\n\nDe stadspomp dateert uit ongeveer 1760 en is uitgevoerd in Lodewijk XV-stijl. Ook die werd gemaakt door steenhouwer Nicolaas Muts, dezelfde maker die we bij het stadhuis tegenkwamen.\n\n\nAmbacht. Geloof. Muziek. Techniek.\n\nAlles kwam hier samen.\n\nLoop nu voor de katholieke kerk langs de Venkelstraat in.", "Dit is misschien wel een van de mooiste straatjes van het moderne Tholen.\n\nKijk rustig om je heen.\n\nEen oude gevel. Een voordeur. Een fiets tegen een muur. Een plant voor een raam. Iemand die achter het glas voorbijgaat.\n\nTholen is geen museum.\n\nEr wordt hier nog steeds gewoond.\n\nEn juist daardoor blijft de historische stad interessant.\n\nWe lopen verder naar de Vlasmarkt. De naam herinnert aan een tijd waarin vlas en andere landbouwproducten een rol speelden in het leven van de streek.\n\nAan het einde staat de romp van korenmolen De Verwachting.\n\nDe molen werd in 1848 gebouwd. Denk even aan een tijd zonder elektriciteit.\n\nAls de wind draaide, kon de molen werken.\n\nAls de wind stilviel, moest je wachten.\n\nBoeren brachten hun graan naar de molenaar. Het graan werd gemalen en het meel kon daarna zijn weg vinden naar de bakker.\n\nMisschien is de naam De Verwachting daarom wel toepasselijker dan hij op het eerste gezicht lijkt.\n\n\nEen molenaar kon plannen wat hij wilde.\n\nMaar uiteindelijk moest hij naar de wind luisteren.\n\nLoop nu het park in en sla gelijk rechtsaf, houd rechts aan, en ga na ongeveer 100 meter het park weer uit bij het Tiny House.", "Hier bij het Tiny House komen we uit bij de Oudelandsepoort.\n\nDit is een plek waar je goed kunt zien hoe de oude stad in de loop van de tijd veranderde. Hier stond vroeger een stadspoort. Op de hoek van de Oudelandsestraat en de Oudelandsepoort stond de middeleeuwse St. Andriespoort. De poort bleef bestaan tot in de tijd van de Tachtigjarige Oorlog.\n\nDe poort is verdwenen. Maar kijk eens naar de bebouwing die ervoor in de plaats kwam.\n\nAan de linkerkant staan monumentale panden die samen een mooi beeld geven van de historische straat. Let op de deuren, de stoepen, het metselwerk en de verschillen tussen de gevels.\n\nJe hoeft niet alle jaartallen te onthouden. Kijk gewoon hoe een deur iets vertelt over status, hoe een stoep laat zien hoe mensen bij hun huis kwamen en hoe metselwerk soms verraadt dat een gevel later is veranderd.\n\nOok het landschap vertelt een verhaal. In de negentiende eeuw werden delen van de oude stadswallen veranderd in een wandelgebied. Waar ooit verdediging en soldaten waren, kwamen bomen, paden en huizen.\n\nDe vijand bleef buiten beeld. Het uitzicht werd belangrijker.\n\nLoop nu door de Oudelandsepoort verder richting Molen De Hoop.", "Voor je staat Molen De Hoop.\n\nHet stadsbestuur liet deze stenen korenmolen in 1736 bouwen. Een molen werkt alleen als er wind is. En dat werd later een probleem.\n\nDe bomen op de singels groeiden in de negentiende eeuw zo hoog dat ze de windvang belemmerden. Daarom werd de molenromp verhoogd met ongeveer 5 meter 60.\n\nDat verklaart de opvallend slanke vorm die je nu ziet. De molen is nog altijd volledig maalvaardig.\n\nKijk daarna om je heen. Je staat op een deel van de oude vesting. Ooit betekenden deze wallen iets heel anders. Hier waren grachten, verdedigingswerken, poorten en soldaten. De grens tussen binnen en buiten was hier letterlijk zichtbaar.\n\nNu is het groen. Je wandelt er. Misschien loopt er een hond. Misschien zit iemand op een bankje. Maar de vorm van het landschap verraadt nog altijd de oude vesting.\n\nVolg dit pad, ongeveer 70 meter, tot de Regentessestraat.\n\nDe naam van deze straat herinnert aan het weeshuis dat hier van 1631 tot 1786 stond. Het werd bestuurd door regenten en regentessen. Het was een belangrijke plek voor kinderen die hun ouders waren kwijtgeraakt.\n\nKijk tegenover de kerk ook naar het zware, geelstenen gebouw. Dit was in de achttiende eeuw verbonden met een grutterij en diende als opslag- of bedrijfsruimte.\n\nDaarna lopen we verder naar de Grote Kerk.", "Daar staat de Grote Kerk van Tholen.\n\nDe onderste delen van de toren gaan terug tot de veertiende eeuw. In de vijftiende eeuw werd de toren verhoogd tot ongeveer 49 meter.\n\nDe kerk zelf groeide in de vijftiende en zestiende eeuw uit tot een indrukwekkend voorbeeld van Brabantse gotiek.\n\nMaar kijk straks ook naar de details.\n\nBinnen liggen meer dan honderd grafzerken. Elke steen is een herinnering aan iemand die hier ooit leefde.\n\nDe preekstoel dateert uit 1648.\n\nEn dan het orgel. Dat werd in 1832 gebouwd door Luitje en Jacob van Dam. Het was oorspronkelijk bedoeld voor een kerk in Leeuwarden en kwam later naar Tholen.\n\nTijdens restauratiewerkzaamheden tussen 1946 en 1959 werden bovendien mummies gevonden. Die zijn ondergebracht in het noordportaal, dat niet toegankelijk is voor bezoekers.\n\n\nJe staat hier dus niet alleen in een kerk.\n\nJe staat op een plek waar eeuwenlang mensen trouwden, rouwden, luisterden, baden en afscheid namen.\n\nDe geschiedenis van een stad zit niet alleen in wat er gebouwd werd.\n\nOok in wie hier begraven ligt.\n\nLoop vanaf de kerk de Kerkstraat in, richting nummer 15. Daar vinden we de Gasthuiskapel.", "Dit is de Gasthuiskapel.\n\nEn achter dit gebouw zit een heel ander verhaal dan achter een kerk of stadhuis.\n\nIn 1314 werd hier het Sint Laurensgasthuis gesticht. Het was bedoeld om arme reizigers onderdak te geven.\n\nDat is een eenvoudig idee, maar voor reizigers in de middeleeuwen kon zo'n plek het verschil maken tussen veilig overnachten en buiten moeten blijven.\n\nDe kapel werd kort na de grote stadsbrand van 1452 gebouwd.\n\nTijdens de Tachtigjarige Oorlog kregen hier ook soldaten verzorging.\n\nLater veranderde het gebouw opnieuw. Vanaf 1631 waren er woningen in gevestigd. Pas in de twintigste eeuw kreeg de plek weer haar huidige betekenis. De restauratie werd in 1975 voltooid.\n\n\nEen gebouw dat begon als plek voor mensen onderweg, werd een plek voor zieken, daarna woningen en uiteindelijk opnieuw een monument.\n\nDat is misschien wel een mooie samenvatting van onze wandeling.\n\nTholen verandert steeds.\n\nMaar oude plekken krijgen telkens een nieuw leven.\n\nWe zijn nog niet terug bij de haven.\n\nLoop verder door de Kerkstraat richting de Botermarkt. Daar wacht ons laatste historische hoofdstuk.", "We zijn aangekomen bij de Botermarkt.\n\nDeze plek werd in 1623 aangelegd om dit deel van de stad een beter aanzien te geven.\n\nKijk bijvoorbeeld naar Botermarkt 9. Het forse huis dateert van ongeveer 1830 en was vroeger een burgemeesterswoning. Nummer 11 heeft mogelijk een zeventiende-eeuwse kern en kreeg in de negentiende eeuw de huidige entree en winkelpui.\n\nOok hier zie je hoe een plein door de eeuwen heen veranderde, terwijl de huizen bleven staan.\n\nKijk rustig om je heen en neem de schaal van de plek in je op.\n\nLoop daarna verder richting de Eendrachtsweg. Daar wacht ons het verhaal van de tram en de verbinding met het vasteland.", "Loop nu verder richting de Eendrachtsweg.\n\nHier veranderde Tholen in 1928 ingrijpend.\n\nTot die tijd moest je voor de oversteek van de Eendracht gebruikmaken van een pont. Er was al sinds 1882 een tramverbinding tussen Bergen op Zoom en Tholen, maar die eindigde bij het veer. In de jaren tachtig van de negentiende eeuw werd bovendien gewerkt aan verbindingen richting Antwerpen.\n\nOp 10 oktober 1928 werd de nieuwe brug over de Eendracht geopend. En diezelfde dag reed de eerste tram de stad in.\n\nDe Eendrachtsweg werd aangelegd als verbinding tussen de brug en de stad. De tram kon nu daadwerkelijk Tholen binnenrijden.\n\nDe verbinding hield niet lang stand. In 1934 werd de tramdienst opgeheven en namen bussen het over.\n\nToch kun je de oude tramlijn nog herkennen. Kijk naar de lijnen en goten in het wegdek. Bij huisnummer 3 staat bovendien nog het oude wachthuisje voor tramreizigers.\n\nDenk nog één keer aan het begin van onze wandeling. Toen begonnen we bij het water. Nu staan we op een weg die ontstond toen Tholen eindelijk een vaste verbinding met het vasteland kreeg.\n\nDe stad ging van varen naar rijden.\n\nVolg de Eendrachtsweg verder richting de Contre Escarpe en de haven.", "Je bent bijna terug bij het beginpunt.\n\nVolg de Eendrachtsweg verder richting de Contre Escarpe en de haven. Je komt weer uit bij het water waar we begonnen.\n\nLuister daar nog even naar de meeuwen en kijk nog één keer naar Tholen.\n\nVan haven tot vesting, van oude straat tot tramweg: de stad heeft zich steeds aangepast, maar het verleden ligt hier nog altijd gewoon onder je voeten.\n\nBedankt voor het meelopen. Goede reis verder."];
-let current=localStorage.getItem('tholen-lang')||'nl'; if(!LANGS.some(x=>x[0]===current)) current='nl'; let selected=Number(localStorage.getItem('tholen-stop')||1); if(!(selected>=1&&selected<=15)) selected=1;
-const bar=document.getElementById('langbar'); LANGS.forEach(x=>{const b=document.createElement('button');b.className='lang';b.dataset.lang=x[0];b.textContent=x[1];b.onclick=()=>setLang(x[0]);bar.appendChild(b)});
-function navUrl(i){const [lat,lon]=POINTS[i-1];return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=walking`}
-function setSelected(n,scroll=true){selected=Math.max(1,Math.min(15,n));localStorage.setItem('tholen-stop',selected);document.getElementById('progress').style.width=`${selected/15*100}%`;document.getElementById('nowTitle').textContent=`${UI[current][9]} ${selected} · ${STOPS[selected-1]}`;document.getElementById('nowSub').textContent=selected===1?UI[current][2]:selected===15?STOPS[14]:`${UI[current][9]} ${selected} van 15`;document.getElementById('prevBtn').disabled=selected===1;document.getElementById('nextBtn').disabled=selected===15;document.querySelectorAll('.stop').forEach((el,i)=>el.classList.toggle('active',i===selected-1));if(scroll) document.getElementById(`stop-${selected}`)?.scrollIntoView({behavior:'smooth',block:'start'})}
-function audioPath(i){return `audio/nl/stop-${String(i).padStart(2,'0')}.mp3`}
-let geoWatchId=null;
-const triggered=new Set();
-let gpsStarted=false;
-function haversineMeters(lat1,lon1,lat2,lon2){
-  const R=6371000, toRad=x=>x*Math.PI/180;
-  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
-  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-  return 2*R*Math.asin(Math.sqrt(a));
+const LANGS = [
+ ["nl","Nederlands","nl-NL","🇳🇱"],["en","English","en-US","🇬🇧"],["de","Deutsch","de-DE","🇩🇪"],
+ ["fr","Français","fr-FR","🇫🇷"],["fi","Suomi","fi-FI","🇫🇮"],["sv","Svenska","sv-SE","🇸🇪"],
+ ["no","Norsk","nb-NO","🇳🇴"],["da","Dansk","da-DK","🇩🇰"],["is","Íslenska","is-IS","🇮🇸"],
+ ["es","Español","es-ES","🇪🇸"],["it","Italiano","it-IT","🇮🇹"],["pt","Português","pt-PT","🇵🇹"],
+ ["pl","Polski","pl-PL","🇵🇱"],["cs","Čeština","cs-CZ","🇨🇿"],["hu","Magyar","hu-HU","🇭🇺"],
+ ["ro","Română","ro-RO","🇷🇴"],["gr","Ελληνικά","el-GR","🇬🇷"],["tr","Türkçe","tr-TR","🇹🇷"],
+ ["ar","العربية المغربية","ar-MA","🇲🇦"],
+ ["bg","Български","bg-BG","🇧🇬"], ["hr","Hrvatski","hr-HR","🇭🇷"], ["et","Eesti","et-EE","🇪🇪"],
+ ["ga","Gaeilge","ga-IE","🇮🇪"], ["lv","Latviešu","lv-LV","🇱🇻"], ["lt","Lietuvių","lt-LT","🇱🇹"],
+ ["mt","Malti","mt-MT","🇲🇹"], ["sk","Slovenčina","sk-SK","🇸🇰"], ["sl","Slovenščina","sl-SI","🇸🇮"]
+];
+const ui={
+ nl:["Tholen door de tijd","Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.","15 haltes · route opgenomen met GPS"],
+ en:["Tholen through time","Follow the actual recorded route and discover the historic town, stop by stop.","15 stops · route recorded by GPS"],
+ de:["Tholen durch die Zeit","Folgen Sie der tatsächlich aufgezeichneten Route und entdecken Sie die historische Altstadt.","15 Stationen · GPS-Aufzeichnung"],
+ fr:["Tholen à travers le temps","Suivez l’itinéraire réellement enregistré et découvrez la ville historique.","15 étapes · itinéraire GPS"],
+ it:["Tholen nel tempo","Segui il percorso realmente registrato e scopri il centro storico.","15 tappe · percorso GPS"],
+ es:["Tholen a través del tiempo","Sigue la ruta realmente registrada y descubre el centro histórico.","15 paradas · ruta GPS"],
+ pt:["Tholen através do tempo","Siga o percurso realmente registado e descubra o centro histórico.","15 paragens · percurso GPS"],
+ da:["Tholen gennem tiden","Følg den faktisk registrerede rute og oplev den historiske by.","15 stop · GPS-rute"],
+ no:["Tholen gjennom tidene","Følg den registrerte ruten og oppdag den historiske byen.","15 stopp · GPS-rute"],
+ fi:["Tholen ajan halki","Seuraa tallennettua reittiä ja tutustu historialliseen kaupunkiin pysäkki pysäkiltä.","15 pysäkkiä · GPS-reitti"],
+ sv:["Tholen genom tiderna","Följ den inspelade rutten och upptäck den historiska staden.","15 stopp · GPS-rutt"],
+ is:["Tholen í gegnum aldirnar","Fylgdu skráðu gönguleiðinni og uppgötvaðu sögulega miðbæinn.","15 stopp · GPS-leið"],
+ pl:["Tholen na przestrzeni dziejów","Podążaj zarejestrowaną trasą i odkrywaj historyczne centrum miasta.","15 przystanków · trasa GPS"],
+ cs:["Tholen v průběhu času","Sledujte zaznamenanou trasu a objevujte historické město zastávku po zastávce.","15 zastávek · GPS trasa"],
+ hu:["Tholen az idők során","Kövesse a rögzített útvonalat, és fedezze fel a történelmi várost megállóról megállóra.","15 megálló · GPS-útvonal"],
+ ro:["Tholen de-a lungul timpului","Urmați traseul înregistrat și descoperiți orașul istoric, oprire cu oprire.","15 opriri · traseu GPS"],
+ gr:["Το Tholen μέσα στον χρόνο","Ακολουθήστε τη διαδρομή που καταγράφηκε και ανακαλύψτε την ιστορική πόλη στάση προς στάση.","15 στάσεις · διαδρομή GPS"],
+ tr:["Tholen zaman içinde","Kaydedilmiş rotayı takip edin ve tarihi kenti durak durak keşfedin.","15 durak · GPS rotası"],
+ ar:["ثولن عبر الزمن","اتبعوا المسار المسجّل واكتشفوا المدينة التاريخية محطةً بعد محطة.","15 محطة · مسار GPS"],
+ bg:["Tholen през времето","Следвайте записания маршрут и откривайте историческия град спирка по спирка.","15 спирки · GPS маршрут"],
+ hr:["Tholen kroz vrijeme","Slijedite snimljenu rutu i otkrivajte povijesni grad postaju po postaju.","15 postaja · GPS ruta"],
+ et:["Tholen läbi aegade","Järgige salvestatud marsruuti ja avastage ajaloolist linna peatus peatuse haaval.","15 peatust · GPS-marsruut"],
+ ga:["Tholen trí na haoiseanna","Lean an bealach taifeadta agus faigh amach faoin mbaile stairiúil, stad ar stad.","15 stad · bealach GPS"],
+ lv:["Tholen cauri laikiem","Sekojiet ierakstītajam maršrutam un atklājiet vēsturisko pilsētu pa pieturai.","15 pieturas · GPS maršruts"],
+ lt:["Tholen per amžius","Sekite įrašytu maršrutu ir atraskite istorinį miestą, stotelę po stotelės.","15 stotelių · GPS maršrutas"],
+ mt:["Tholen matul iż-żmien","Segwi r-rotta rreġistrata u skopri l-belt storika, waqfa wara l-oħra.","15-il waqfa · rotta GPS"],
+ sk:["Tholen v priebehu času","Sledujte zaznamenanú trasu a objavujte historické mesto zastávku po zastávke.","15 zastávok · GPS trasa"],
+ sl:["Tholen skozi čas","Sledite posneti poti in odkrivajte zgodovinsko mesto, postajo za postajo.","15 postaj · pot GPS"]
+};
+let currentLang="nl";
+const map=L.map("map",{zoomControl:true}).setView([51.5318,4.2208],16);
+L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{maxZoom:20,subdomains:["a","b","c"],attribution:'© OpenStreetMap contributors, tiles © OSM France'}).addTo(map);
+const latlngs=ROUTE_MAP_DATA.track.map(p=>[p[0],p[1]]);
+const line=L.polyline(latlngs,{color:"#17322f",weight:5,opacity:.9}).addTo(map);
+const bounds=line.getBounds();
+const stopMarkers=[];
+ROUTE_MAP_DATA.stops.forEach(s=>{
+  const icon=L.divIcon({className:"",html:`<div class="marker">${s.nr}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+  const m=L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(`<b>${s.nr}. ${s.title}</b>`);
+  stopMarkers.push(m);
+});
+document.getElementById("fit").onclick=()=>map.fitBounds(bounds,{padding:[25,25]});
+
+const langbar=document.getElementById("langbar");
+LANGS.forEach(([code,name,voice,flag])=>{
+  const b=document.createElement("button");
+  b.className="lang";b.dataset.lang=code;
+  b.innerHTML=`<span class="flag ${code}" aria-hidden="true"></span><span>${name}</span>`;
+  b.onclick=()=>setLang(code);langbar.appendChild(b);
+});
+function setLang(lang){
+  if(window.tholenAudio){window.tholenAudio.pause();window.tholenAudio=null;} currentLang=lang; localStorage.setItem("tholen-lang",lang);
+  document.documentElement.lang=lang;
+  document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  document.getElementById("title").textContent=ui[lang][0];
+  document.getElementById("intro").textContent=ui[lang][1];
+  document.getElementById("subtitle").textContent=ui[lang][2];
+  renderStops();
 }
-function gpsStatus(msg){const el=document.getElementById('gpsStatus');if(el)el.textContent=msg;}
-function startGPS(){
-  if(gpsStarted)return;
-  gpsStarted=true;
-  if(!navigator.geolocation){gpsStatus('GPS wordt niet ondersteund door deze browser.');return;}
-  gpsStatus('GPS wordt gestart…');
-  geoWatchId=navigator.geolocation.watchPosition(onPosition,onGeoError,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
-}
-function onGeoError(err){
-  const messages={1:'Locatietoegang geweigerd. Geef de website toestemming voor locatie.',2:'Je locatie kon niet worden bepaald.',3:'Het bepalen van je locatie duurde te lang.'};
-  gpsStatus(messages[err.code]||'GPS-fout.');
-}
-function updateGpsMarker(latitude,longitude,heading){
-  const marker=document.getElementById("gpsMarker"); if(!marker)return;
-  // Affine transformation calibrated from the 15 exact user-placed stop markers
-  // on the 1200 x 760 routekaart image.
-  const x=552.1162395083642 + 81.5540024*(latitude-51.532) + 127392.078*(longitude-4.221);
-  const y=363.8543656513143 - 204773.096*(latitude-51.532) + 14.987815*(longitude-4.221);
-  if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>1200||y<0||y>760){marker.classList.remove("active");return;}
-  marker.style.left=(x/1200*100)+"%";
-  marker.style.top=(y/760*100)+"%";
-  marker.classList.add("active");
-  if(Number.isFinite(heading)){ marker.style.transform=`translate(-50%,-50%) rotate(${heading}deg)`; }
-  else { marker.style.transform="translate(-50%,-50%)"; }
-}
-function onPosition(pos){
-  const {latitude,longitude,accuracy,heading}=pos.coords;
-  updateGpsMarker(latitude,longitude,heading);
-  let nearestIndex=0, nearest=Infinity;
-  POINTS.forEach((p,i)=>{const d=haversineMeters(latitude,longitude,p[0],p[1]);if(d<nearest){nearest=d;nearestIndex=i;}});
-  const n=nearestIndex+1;
-  gpsStatus(`GPS actief · dichtstbijzijnde halte ${n} op ongeveer ${Math.round(nearest)} m · nauwkeurigheid ±${Math.round(accuracy)} m · Audio start automatisch binnen 30 m.`);
-  if(nearest<=30 && !triggered.has(n)){
-    triggered.add(n);
-    setSelected(n,true);
-    playAudioForStop(n,true);
+async function loadText(lang,nr){
+  if(window.THOLEN_TEXTS && window.THOLEN_TEXTS[lang] && window.THOLEN_TEXTS[lang][String(nr)]){
+    return window.THOLEN_TEXTS[lang][String(nr)];
+  }
+  try{
+    const r=await fetch(`teksten/${lang}/stop-${String(nr).padStart(2,"0")}.txt`);
+    if(!r.ok) throw new Error();
+    return (await r.text()).trim();
+  }catch(e){
+    if(window.THOLEN_TEXTS && window.THOLEN_TEXTS.nl && window.THOLEN_TEXTS.nl[String(nr)]){
+      return window.THOLEN_TEXTS.nl[String(nr)];
+    }
+    const r=await fetch(`teksten/nl/stop-${String(nr).padStart(2,"0")}.txt`);
+    return (await r.text()).trim();
   }
 }
-function playAudioForStop(i,automatic=false){
-  if(current!=='nl'){gpsStatus('Deze taal heeft nog geen audiobestanden. Kies Nederlands voor automatische Nederlandse audio.');return;}
-  const c=document.getElementById(`stop-${i}`); if(!c)return;
-  const aWrap=c.querySelector('.audio');
-  aWrap.innerHTML=`<audio controls preload="auto" src="${audioPath(i)}"></audio>`;
-  aWrap.classList.add('show');
-  const audio=aWrap.querySelector('audio');
-  const p=audio.play();
-  if(p&&typeof p.catch==='function')p.catch(()=>{gpsStatus(automatic?'Halte bereikt. Tik op ▶ Audio om de automatische audio te starten.':'Audio kan niet automatisch starten.');});
+async function renderStops(){
+  const box=document.getElementById("stops");
+  box.innerHTML="";
+  const cards=[];
+  for(const s of ROUTE_MAP_DATA.stops){
+    const card=document.createElement("article");
+    card.className="card";
+    card.innerHTML=`<div class="stophead"><div class="num">${s.nr}</div><div><div class="stoptitle">${s.title}</div><div class="small">Stop ${s.nr}</div></div></div><div class="small text">Tekst wordt geladen...</div><div class="stop-actions"><button class="btn play">Audio</button><button class="btn kaart">Op kaart</button></div>`;
+    box.appendChild(card);
+    cards.push([s,card]);
+    card.querySelector(".kaart").onclick=()=>{map.setView([s.lat,s.lon],18);stopMarkers[s.nr-1].openPopup();window.scrollTo({top:0,behavior:"smooth"})};
+    card.querySelector(".play").onclick=()=>playStop(s.nr,card);
+  }
+  await Promise.all(cards.map(async ([s,card])=>{
+    const t=await loadText(currentLang,s.nr);
+    card.querySelector(".text").textContent=t || "Historische halte van de wandeling.";
+  }));
 }
-function render(){document.documentElement.lang=UI[current]?LANGS.find(x=>x[0]===current)[2]:'nl';document.getElementById('title').textContent=UI[current][0];document.getElementById('intro').textContent=UI[current][1];document.getElementById('subtitle').textContent=UI[current][2];document.getElementById('stopsTitle').textContent=UI[current][3];document.getElementById('notice').textContent=UI[current][10];document.getElementById('startBtn').textContent=current==='nl'?'Start wandeling + GPS':'Start walk + GPS';document.getElementById('mapBtn').textContent='Routekaart';document.querySelectorAll('.lang').forEach(b=>b.classList.toggle('active',b.dataset.lang===current));const box=document.getElementById('stops');box.innerHTML='';
-for(let i=1;i<=15;i++){const c=document.createElement('article');c.className='stop';c.id=`stop-${i}`;const text=current==='nl'?NL_TEXTS[i-1]:'[Nog geen vertaling in deze versie.]';c.innerHTML=`<div class="stophead"><div class="num">${i}</div><div><div class="stoptitle">${STOPS[i-1]}</div><div class="small">${UI[current][9]} ${i} van 15</div></div></div><div class="text"></div><div class="stop-actions"><button class="btn primary audioBtn">▶ ${UI[current][6]}</button><a class="btn" target="_blank" rel="noopener" href="${navUrl(i)}">${UI[current][7]}</a><button class="btn copyBtn">${UI[current][8]}</button></div><div class="audio"></div>`;box.appendChild(c);c.querySelector('.text').textContent=text;const ab=c.querySelector('.audioBtn');ab.onclick=(e)=>{e.stopPropagation();playAudioForStop(i,false)};c.querySelector('.copyBtn').onclick=async(e)=>{e.stopPropagation();try{await navigator.clipboard.writeText(c.querySelector('.text').textContent)}catch(_){}};c.onclick=()=>setSelected(i,false)}setSelected(selected,false)}
-function setLang(l){current=l;localStorage.setItem('tholen-lang',l);render()}
-document.getElementById('startBtn').onclick=()=>{setSelected(1,true);startGPS();};document.getElementById('mapBtn').onclick=()=>document.getElementById('map').scrollIntoView({behavior:'smooth'});document.getElementById('prevBtn').onclick=()=>setSelected(selected-1,true);document.getElementById('nextBtn').onclick=()=>setSelected(selected+1,true);render();
-</script></body></html>
+let speech=null;
+function playStop(nr,card){
+  if(window.tholenAudio){try{window.tholenAudio.pause();}catch(e){}}
+  const lang=(typeof currentLang==="string"&&currentLang)?currentLang:"nl";
+  try{fetch("stats.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"audio_start",lang:lang,stop:nr})}).catch(()=>{});}catch(e){}
+  const src=`audio/${lang}/stop-${String(nr).padStart(2,"0")}.mp3`;
+  const player=new Audio(src);
+  window.tholenAudio=player;
+  player.play().catch(()=>{
+    let p=card.querySelector(".audio-fallback");
+    if(!p){
+      p=document.createElement("audio");
+      p.className="audio-fallback";
+      p.controls=true;
+      p.style.width="100%";
+      p.style.marginTop="10px";
+      card.querySelector(".stop-actions").after(p);
+    }
+    p.src=src;
+    p.play().catch(()=>{});
+  });
+}
+setLang(localStorage.getItem("tholen-lang")||"nl");
+map.fitBounds(bounds,{padding:[25,25]});
+
+// Privacyvriendelijke eigen teller: één bezoek per browser per dag.
+(function(){
+  try {
+    const key = "tholen_stats_last_visit";
+    const today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(key) !== today) {
+      localStorage.setItem(key, today);
+      fetch("stats.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({event:"visit", lang:currentLang || "nl"})
+      }).catch(()=>{});
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

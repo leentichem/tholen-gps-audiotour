@@ -1,63 +1,214 @@
-<!doctype html>
-<html lang="nl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#174a4a">
-<title>Tholen GPS-audiotour</title>
+﻿<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Historische Audiowandeling Tholen</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;color:#173535;background:#174a4a}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#315f5b,#163d3d)}
-.card{width:min(620px,100%);background:#fff;border-radius:28px;padding:34px 24px;text-align:center;box-shadow:0 20px 60px #0005}
-.mark{font-size:42px}.kicker{letter-spacing:.16em;text-transform:uppercase;font-size:12px;font-weight:800;color:#c89d52}
-h1{font-family:Georgia,serif;font-size:clamp(36px,10vw,58px);line-height:1.02;margin:10px 0 15px}
-p{font-size:18px;line-height:1.55;color:#5c6d6d}
-.start{width:100%;border:0;border-radius:18px;padding:18px;font-size:20px;font-weight:800;color:#fff;background:#174a4a;cursor:pointer}
-.info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
-.info div{background:#f2efe6;border-radius:14px;padding:12px 5px;font-size:13px}.info strong{display:block;font-size:16px}
-.notice{padding:14px;border-radius:14px;background:#edf5f3;color:#355757;font-size:13px;line-height:1.45}
-.hidden{display:none}#tour{min-height:100vh;background:#f7f4ec;padding:24px}.tour-card{max-width:680px;margin:auto}
-#status{padding:14px;border-radius:14px;background:#e7f0ee;margin:15px 0}
-.point{padding:18px 0;border-bottom:1px solid #ddd}.point h2{font-family:Georgia,serif}
-.stop{font-size:12px;color:#738080;text-transform:uppercase;letter-spacing:.08em}
-</style></head><body>
-<section id="start" class="hero"><main class="card">
-<div class="mark">⚓</div><div class="kicker">Historisch Tholen</div>
-<h1>Tholen<br>GPS-audiotour</h1>
-<p>Wandel door de eeuwen heen en ontdek de verhalen achter de haven, vesting, Markt, Grote Kerk en de oude straten van Tholen.</p>
-<button class="start" onclick="startTour()">▶ Start de Tholen GPS-audiotour</button>
-<div class="info"><div><strong>12</strong>verhalen</div><div><strong>± 3 km</strong>wandelroute</div><div><strong>GPS</strong>automatisch</div></div>
-<div class="notice">📍 <strong>Locatie nodig</strong><br>De tour gebruikt je GPS om het juiste verhaal op de juiste plek automatisch te starten. Geef toestemming voor locatie wanneer je telefoon daarom vraagt.</div>
-<p style="font-size:12px;margin-bottom:0">Zet je geluid aan en houd je telefoon bij je tijdens de wandeling.</p>
-</main></section>
-<section id="tour" class="hidden"><div class="tour-card">
-<h1>De Tholen GPS-audiotour</h1><div id="status">GPS wordt gestart…</div><div id="content"></div>
-</div></section>
+:root{--ink:#17322f;--paper:#f7f4ed;--line:#d8d1c4;--accent:#8b6f47;--white:#fff}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:18px 18px 12px;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}
+.brand{font-family:Georgia,serif;font-size:22px;font-weight:700}.sub{font-size:13px;opacity:.72;margin-top:3px}
+.langbar{display:flex;gap:7px;overflow:auto;padding:12px 0 2px;scrollbar-width:none}.langbar::-webkit-scrollbar{display:none}
+.lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;cursor:pointer}
+.lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+main{max-width:1100px;margin:auto;padding:14px}
+.hero{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+h1{font-family:Georgia,serif;margin:0 0 7px;font-size:28px}.hero p{margin:0;line-height:1.55}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;text-decoration:none;color:inherit;font-weight:600;cursor:pointer}
+#map{height:56vh;min-height:380px;border-radius:18px;border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:9px 0}
+.stophead{display:flex;gap:11px;align-items:flex-start}.num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.stoptitle{font-weight:750;font-size:16px}.small{font-size:13px;opacity:.7;margin-top:3px}
+.stop-actions{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}.play{background:var(--ink);color:#fff;border:0}
+footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
+.leaflet-popup-content{font-family:system-ui,sans-serif}.marker{background:var(--ink);color:#fff;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px #0004;font-weight:700}
+@media(min-width:800px){.hero{padding:24px}h1{font-size:34px}}
+.audio-player audio{display:block}
+.flag{width:22px;height:15px;display:inline-block;border:1px solid #aaa;border-radius:2px;overflow:hidden;position:relative;flex:none}
+.flag.nl{background:linear-gradient(to bottom,#ae1c28 0 33%,#fff 33% 66%,#21468b 66%)}
+.flag.en{background:#fff}.flag.en:before{content:'';position:absolute;left:9px;top:0;width:4px;height:100%;background:#c8102e}.flag.en:after{content:'';position:absolute;left:0;top:5px;width:100%;height:4px;background:#c8102e}
+.flag.de{background:linear-gradient(to bottom,#000 0 33%,#dd0000 33% 66%,#ffce00 66%)}
+.flag.fr{background:linear-gradient(to right,#0055a4 0 33%,#fff 33% 66%,#ef4135 66%)}
+.flag.it{background:linear-gradient(to right,#009246 0 33%,#fff 33% 66%,#ce2b37 66%)}
+.flag.es{background:linear-gradient(to bottom,#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)}
+.flag.pt{background:linear-gradient(to right,#046a38 0 40%,#da291c 40%)}.flag.pt:after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-radius:50%;background:#f5c242}
+.flag.da{background:#c8102e}.flag.da:before,.flag.da:after{content:'';position:absolute;background:#fff}.flag.da:before{left:7px;top:0;width:3px;height:100%}.flag.da:after{left:0;top:6px;width:100%;height:3px}
+.flag.no{background:#ba0c2f}.flag.no:before,.flag.no:after{content:'';position:absolute;background:#fff}.flag.no:before{left:7px;top:0;width:6px;height:100%}.flag.no:after{left:0;top:5px;width:100%;height:6px;background:#00205b}
+.flag.sv{background:#006aa7}.flag.sv:before,.flag.sv:after{content:'';position:absolute;background:#fecc00}.flag.sv:before{left:6px;top:0;width:4px;height:100%}.flag.sv:after{left:0;top:5px;width:100%;height:4px}
+.flag.pl{background:linear-gradient(to bottom,#fff 0 50%,#dc143c 50%)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Historische Audiowandeling Tholen</div>
+  <div class="sub" id="subtitle">15 haltes · route opgenomen met GPS</div>
+  <div class="langbar" id="langbar"></div>
+</header>
+<main>
+  <section class="hero">
+    <h1 id="title">Tholen door de tijd</h1>
+    <p id="intro">Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.</p>
+    <div class="actions">
+      <a class="btn" href="Gps_Audio_Stadswandeling_.gpx" download>GPX downloaden</a>
+      <button class="btn" id="fit">Route volledig tonen</button>
+    </div>
+  </section>
+  <div id="map"></div>
+  <section id="stops"></section>
+</main>
+<footer>De routekaart is gebaseerd op de aangeleverde GPS-opname.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="route-map-data.js"></script>
+<script src="teksten-data.js"></script>
 <script>
-const points=[
-["De haven",51.53180,4.22390,"Hier begon het verhaal van Tholen: aan het water, waar handel, tol en scheepvaart de stad vormden."],
-["De vesting",51.53220,4.22210,"Tholen groeide uit tot een versterkte stad. Grachten, wallen en bastions beschermden de inwoners."],
-["Het oude stadhuis",51.531956,4.221502,"Na de grote stadsbrand van 1452 werd hier een nieuw stadhuis gebouwd. Het werd het bestuurlijke en rechterlijke hart van de stad."],
-["De Markt",51.53137,4.22140,"Op de Markt speelde zich eeuwenlang het dagelijks stadsleven af: handel, ambacht en ontmoetingen."],
-["Stoofstraat en meekrap",51.53135,4.22160,"Meekrap was eeuwenlang een belangrijk gewas in Zeeland. De wortel leverde de rode kleurstof die handel en nijverheid voedde."],
-["De Grote Kerk",51.53115,4.22055,"De Grote Kerk groeide mee met de stad en bewaart sporen van middeleeuwen, Reformatie en latere generaties."],
-["Het gasthuis",51.53105,4.22005,"Het Sint-Laurensgasthuis bood al in de middeleeuwen onderdak en zorg aan arme reizigers en andere hulpbehoevenden."],
-["De oude dijk",51.53080,4.22130,"Deze straten volgen de oude zeedijk. Hier beleef je hoe nauw Tholen historisch met het water verbonden was."],
-["De vestingwallen",51.53065,4.21940,"Waar nu gewandeld wordt, lag ooit militair terrein met wallen, grachten en bastions."],
-["Korenmolen De Hoop",51.53202,4.21693,"Molen De Hoop werd gebouwd in 1736. Later werd de molen verhoogd om boven de bomen voldoende wind te vangen."],
-["Het weeshuis",51.53090,4.21955,"In de Regentessestraat stond eeuwenlang een weeshuis. Het vertelt het verhaal van zorg, bestuur en het dagelijks leven in de oude stad."],
-["Terug bij het water",51.53180,4.22390,"Je bent terug bij de haven. Water, handel, verdediging en gemeenschap vormen samen het verhaal van Tholen."]
+const LANGS = [
+ ["nl","Nederlands","nl-NL","🇳🇱"],["en","English","en-US","🇬🇧"],["de","Deutsch","de-DE","🇩🇪"],
+ ["fr","Français","fr-FR","🇫🇷"],["fi","Suomi","fi-FI","🇫🇮"],["sv","Svenska","sv-SE","🇸🇪"],
+ ["no","Norsk","nb-NO","🇳🇴"],["da","Dansk","da-DK","🇩🇰"],["is","Íslenska","is-IS","🇮🇸"],
+ ["es","Español","es-ES","🇪🇸"],["it","Italiano","it-IT","🇮🇹"],["pt","Português","pt-PT","🇵🇹"],
+ ["pl","Polski","pl-PL","🇵🇱"],["cs","Čeština","cs-CZ","🇨🇿"],["hu","Magyar","hu-HU","🇭🇺"],
+ ["ro","Română","ro-RO","🇷🇴"],["gr","Ελληνικά","el-GR","🇬🇷"],["tr","Türkçe","tr-TR","🇹🇷"],
+ ["ar","العربية المغربية","ar-MA","🇲🇦"],
+ ["bg","Български","bg-BG","🇧🇬"], ["hr","Hrvatski","hr-HR","🇭🇷"], ["et","Eesti","et-EE","🇪🇪"],
+ ["ga","Gaeilge","ga-IE","🇮🇪"], ["lv","Latviešu","lv-LV","🇱🇻"], ["lt","Lietuvių","lt-LT","🇱🇹"],
+ ["mt","Malti","mt-MT","🇲🇹"], ["sk","Slovenčina","sk-SK","🇸🇰"], ["sl","Slovenščina","sl-SI","🇸🇮"]
 ];
-let spoken=new Set();
-function dist(a,b,c,d){const R=6371000,p=Math.PI/180,x=.5-Math.cos((c-a)*p)/2+Math.cos(a*p)*Math.cos(c*p)*(1-Math.cos((d-b)*p))/2;return 2*R*Math.asin(Math.sqrt(x))}
-function say(t){if(!speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="nl-NL";u.rate=.95;speechSynthesis.speak(u)}
-function startTour(){
- document.getElementById("start").classList.add("hidden");document.getElementById("tour").classList.remove("hidden");
- if(!navigator.geolocation){status.textContent="Deze browser ondersteunt geen GPS.";return}
- status.textContent="📍 GPS wordt gestart. Geef locatie toestemming als daarom wordt gevraagd.";
- navigator.geolocation.watchPosition(pos=>{
-  let la=pos.coords.latitude,lo=pos.coords.longitude,near=null;
-  points.forEach((p,i)=>{let d=dist(la,lo,p[1],p[2]);if(!near||d<near.d)near={p,i,d}});
-  status.textContent="📍 GPS actief · nauwkeurigheid ± "+Math.round(pos.coords.accuracy)+" m";
-  if(near.d<=25&&!spoken.has(near.i)){spoken.add(near.i);content.innerHTML='<div class="point"><div class="stop">Stop '+(near.i+1)+' van '+points.length+'</div><h2>'+near.p[0]+'</h2><p>'+near.p[3]+'</p></div>'+content.innerHTML;say(near.p[3])}
- },e=>{status.textContent=e.code===1?"⚠️ Locatie is geweigerd. Zet Locatie voor deze website op 'Toestaan' in je browserinstellingen.":"⚠️ GPS is momenteel niet beschikbaar. Controleer of Locatie/GPS is ingeschakeld."},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+const ui={
+ nl:["Tholen door de tijd","Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.","15 haltes · route opgenomen met GPS"],
+ en:["Tholen through time","Follow the actual recorded route and discover the historic town, stop by stop.","15 stops · route recorded by GPS"],
+ de:["Tholen durch die Zeit","Folgen Sie der tatsächlich aufgezeichneten Route und entdecken Sie die historische Altstadt.","15 Stationen · GPS-Aufzeichnung"],
+ fr:["Tholen à travers le temps","Suivez l’itinéraire réellement enregistré et découvrez la ville historique.","15 étapes · itinéraire GPS"],
+ it:["Tholen nel tempo","Segui il percorso realmente registrato e scopri il centro storico.","15 tappe · percorso GPS"],
+ es:["Tholen a través del tiempo","Sigue la ruta realmente registrada y descubre el centro histórico.","15 paradas · ruta GPS"],
+ pt:["Tholen através do tempo","Siga o percurso realmente registado e descubra o centro histórico.","15 paragens · percurso GPS"],
+ da:["Tholen gennem tiden","Følg den faktisk registrerede rute og oplev den historiske by.","15 stop · GPS-rute"],
+ no:["Tholen gjennom tidene","Følg den registrerte ruten og oppdag den historiske byen.","15 stopp · GPS-rute"],
+ fi:["Tholen ajan halki","Seuraa tallennettua reittiä ja tutustu historialliseen kaupunkiin pysäkki pysäkiltä.","15 pysäkkiä · GPS-reitti"],
+ sv:["Tholen genom tiderna","Följ den inspelade rutten och upptäck den historiska staden.","15 stopp · GPS-rutt"],
+ is:["Tholen í gegnum aldirnar","Fylgdu skráðu gönguleiðinni og uppgötvaðu sögulega miðbæinn.","15 stopp · GPS-leið"],
+ pl:["Tholen na przestrzeni dziejów","Podążaj zarejestrowaną trasą i odkrywaj historyczne centrum miasta.","15 przystanków · trasa GPS"],
+ cs:["Tholen v průběhu času","Sledujte zaznamenanou trasu a objevujte historické město zastávku po zastávce.","15 zastávek · GPS trasa"],
+ hu:["Tholen az idők során","Kövesse a rögzített útvonalat, és fedezze fel a történelmi várost megállóról megállóra.","15 megálló · GPS-útvonal"],
+ ro:["Tholen de-a lungul timpului","Urmați traseul înregistrat și descoperiți orașul istoric, oprire cu oprire.","15 opriri · traseu GPS"],
+ gr:["Το Tholen μέσα στον χρόνο","Ακολουθήστε τη διαδρομή που καταγράφηκε και ανακαλύψτε την ιστορική πόλη στάση προς στάση.","15 στάσεις · διαδρομή GPS"],
+ tr:["Tholen zaman içinde","Kaydedilmiş rotayı takip edin ve tarihi kenti durak durak keşfedin.","15 durak · GPS rotası"],
+ ar:["ثولن عبر الزمن","اتبعوا المسار المسجّل واكتشفوا المدينة التاريخية محطةً بعد محطة.","15 محطة · مسار GPS"],
+ bg:["Tholen през времето","Следвайте записания маршрут и откривайте историческия град спирка по спирка.","15 спирки · GPS маршрут"],
+ hr:["Tholen kroz vrijeme","Slijedite snimljenu rutu i otkrivajte povijesni grad postaju po postaju.","15 postaja · GPS ruta"],
+ et:["Tholen läbi aegade","Järgige salvestatud marsruuti ja avastage ajaloolist linna peatus peatuse haaval.","15 peatust · GPS-marsruut"],
+ ga:["Tholen trí na haoiseanna","Lean an bealach taifeadta agus faigh amach faoin mbaile stairiúil, stad ar stad.","15 stad · bealach GPS"],
+ lv:["Tholen cauri laikiem","Sekojiet ierakstītajam maršrutam un atklājiet vēsturisko pilsētu pa pieturai.","15 pieturas · GPS maršruts"],
+ lt:["Tholen per amžius","Sekite įrašytu maršrutu ir atraskite istorinį miestą, stotelę po stotelės.","15 stotelių · GPS maršrutas"],
+ mt:["Tholen matul iż-żmien","Segwi r-rotta rreġistrata u skopri l-belt storika, waqfa wara l-oħra.","15-il waqfa · rotta GPS"],
+ sk:["Tholen v priebehu času","Sledujte zaznamenanú trasu a objavujte historické mesto zastávku po zastávke.","15 zastávok · GPS trasa"],
+ sl:["Tholen skozi čas","Sledite posneti poti in odkrivajte zgodovinsko mesto, postajo za postajo.","15 postaj · pot GPS"]
+};
+let currentLang="nl";
+const map=L.map("map",{zoomControl:true}).setView([51.5318,4.2208],16);
+L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{maxZoom:20,subdomains:["a","b","c"],attribution:'© OpenStreetMap contributors, tiles © OSM France'}).addTo(map);
+const latlngs=ROUTE_MAP_DATA.track.map(p=>[p[0],p[1]]);
+const line=L.polyline(latlngs,{color:"#17322f",weight:5,opacity:.9}).addTo(map);
+const bounds=line.getBounds();
+const stopMarkers=[];
+ROUTE_MAP_DATA.stops.forEach(s=>{
+  const icon=L.divIcon({className:"",html:`<div class="marker">${s.nr}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+  const m=L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(`<b>${s.nr}. ${s.title}</b>`);
+  stopMarkers.push(m);
+});
+document.getElementById("fit").onclick=()=>map.fitBounds(bounds,{padding:[25,25]});
+
+const langbar=document.getElementById("langbar");
+LANGS.forEach(([code,name,voice,flag])=>{
+  const b=document.createElement("button");
+  b.className="lang";b.dataset.lang=code;
+  b.innerHTML=`<span class="flag ${code}" aria-hidden="true"></span><span>${name}</span>`;
+  b.onclick=()=>setLang(code);langbar.appendChild(b);
+});
+function setLang(lang){
+  if(window.tholenAudio){window.tholenAudio.pause();window.tholenAudio=null;} currentLang=lang; localStorage.setItem("tholen-lang",lang);
+  document.documentElement.lang=lang;
+  document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  document.getElementById("title").textContent=ui[lang][0];
+  document.getElementById("intro").textContent=ui[lang][1];
+  document.getElementById("subtitle").textContent=ui[lang][2];
+  renderStops();
 }
-</script></body></html>
+async function loadText(lang,nr){
+  if(window.THOLEN_TEXTS && window.THOLEN_TEXTS[lang] && window.THOLEN_TEXTS[lang][String(nr)]){
+    return window.THOLEN_TEXTS[lang][String(nr)];
+  }
+  try{
+    const r=await fetch(`teksten/${lang}/stop-${String(nr).padStart(2,"0")}.txt`);
+    if(!r.ok) throw new Error();
+    return (await r.text()).trim();
+  }catch(e){
+    if(window.THOLEN_TEXTS && window.THOLEN_TEXTS.nl && window.THOLEN_TEXTS.nl[String(nr)]){
+      return window.THOLEN_TEXTS.nl[String(nr)];
+    }
+    const r=await fetch(`teksten/nl/stop-${String(nr).padStart(2,"0")}.txt`);
+    return (await r.text()).trim();
+  }
+}
+async function renderStops(){
+  const box=document.getElementById("stops");
+  box.innerHTML="";
+  const cards=[];
+  for(const s of ROUTE_MAP_DATA.stops){
+    const card=document.createElement("article");
+    card.className="card";
+    card.innerHTML=`<div class="stophead"><div class="num">${s.nr}</div><div><div class="stoptitle">${s.title}</div><div class="small">Stop ${s.nr}</div></div></div><div class="small text">Tekst wordt geladen...</div><div class="stop-actions"><button class="btn play">Audio</button><button class="btn kaart">Op kaart</button></div>`;
+    box.appendChild(card);
+    cards.push([s,card]);
+    card.querySelector(".kaart").onclick=()=>{map.setView([s.lat,s.lon],18);stopMarkers[s.nr-1].openPopup();window.scrollTo({top:0,behavior:"smooth"})};
+    card.querySelector(".play").onclick=()=>playStop(s.nr,card);
+  }
+  await Promise.all(cards.map(async ([s,card])=>{
+    const t=await loadText(currentLang,s.nr);
+    card.querySelector(".text").textContent=t || "Historische halte van de wandeling.";
+  }));
+}
+let speech=null;
+function playStop(nr,card){
+  if(window.tholenAudio){try{window.tholenAudio.pause();}catch(e){}}
+  const lang=(typeof currentLang==="string"&&currentLang)?currentLang:"nl";
+  try{fetch("stats.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"audio_start",lang:lang,stop:nr})}).catch(()=>{});}catch(e){}
+  const src=`audio/${lang}/stop-${String(nr).padStart(2,"0")}.mp3`;
+  const player=new Audio(src);
+  window.tholenAudio=player;
+  player.play().catch(()=>{
+    let p=card.querySelector(".audio-fallback");
+    if(!p){
+      p=document.createElement("audio");
+      p.className="audio-fallback";
+      p.controls=true;
+      p.style.width="100%";
+      p.style.marginTop="10px";
+      card.querySelector(".stop-actions").after(p);
+    }
+    p.src=src;
+    p.play().catch(()=>{});
+  });
+}
+setLang(localStorage.getItem("tholen-lang")||"nl");
+map.fitBounds(bounds,{padding:[25,25]});
+
+// Privacyvriendelijke eigen teller: één bezoek per browser per dag.
+(function(){
+  try {
+    const key = "tholen_stats_last_visit";
+    const today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(key) !== today) {
+      localStorage.setItem(key, today);
+      fetch("stats.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({event:"visit", lang:currentLang || "nl"})
+      }).catch(()=>{});
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

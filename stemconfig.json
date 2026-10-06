@@ -1,0 +1,68 @@
+{
+  "nl": {
+    "voice": "nl-NL-FennaNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "en": {
+    "voice": "en-US-AriaNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "de": {
+    "voice": "de-DE-KatjaNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "fr": {
+    "voice": "fr-FR-DeniseNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "it": {
+    "voice": "it-IT-ElsaNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "es": {
+    "voice": "es-ES-ElviraNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "pt": {
+    "voice": "pt-PT-RaquelNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "da": {
+    "voice": "Supertonic F1",
+    "engine": "supertonic",
+    "rate": "0.95",
+    "pitch": "default"
+  },
+  "no": {
+    "voice": "nb-NO-PernilleNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "sv": {
+    "voice": "sv-SE-SofieNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  },
+  "pl": {
+    "voice": "pl-PL-ZofiaNeural",
+    "engine": "edge-tts",
+    "rate": "-10%",
+    "pitch": "-1Hz"
+  }
+}
