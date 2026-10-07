@@ -1,16 +1,16 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Historische Audiowandeling Tholen</title>
+<title>Tholen door de tijd — historische audiowandeling</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--ink:#17322f;--paper:#f7f4ed;--line:#d8d1c4;--accent:#8b6f47;--white:#fff}
 *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 header{padding:18px 18px 12px;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}
 .brand{font-family:Georgia,serif;font-size:22px;font-weight:700}.sub{font-size:13px;opacity:.72;margin-top:3px}
-.langbar{display:flex;gap:7px;overflow:auto;padding:12px 0 2px;scrollbar-width:none}.langbar::-webkit-scrollbar{display:none}
+.langbar{display:flex;flex-wrap:wrap;gap:7px;overflow:visible;padding:12px 0 2px}
 .lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;cursor:pointer}
 .lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 main{max-width:1100px;margin:auto;padding:14px}
@@ -21,7 +21,7 @@ h1{font-family:Georgia,serif;margin:0 0 7px;font-size:28px}.hero p{margin:0;line
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:9px 0}
 .stophead{display:flex;gap:11px;align-items:flex-start}.num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
 .stoptitle{font-weight:750;font-size:16px}.small{font-size:13px;opacity:.7;margin-top:3px}
-.stop-actions{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}.play{background:var(--ink);color:#fff;border:0}
+.stop-actions{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}.play{background:var(--ink);color:#fff;border:0}.startbtn{background:var(--ink);color:#fff;border-color:var(--ink);font-size:18px;padding:13px 18px}
 footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
 .leaflet-popup-content{font-family:system-ui,sans-serif}.marker{background:var(--ink);color:#fff;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px #0004;font-weight:700}
 @media(min-width:800px){.hero{padding:24px}h1{font-size:34px}}
@@ -34,10 +34,29 @@ footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
 .flag.it{background:linear-gradient(to right,#009246 0 33%,#fff 33% 66%,#ce2b37 66%)}
 .flag.es{background:linear-gradient(to bottom,#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)}
 .flag.pt{background:linear-gradient(to right,#046a38 0 40%,#da291c 40%)}.flag.pt:after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-radius:50%;background:#f5c242}
-.flag.da{background:#c8102e}.flag.da:before,.flag.da:after{content:'';position:absolute;background:#fff}.flag.da:before{left:7px;top:0;width:3px;height:100%}.flag.da:after{left:0;top:6px;width:100%;height:3px}
+.flag.da{background:linear-gradient(to right,transparent 0 36%,#fff 36% 46%,transparent 46%),linear-gradient(to bottom,#c8102e 0 42%,#fff 42% 58%,#c8102e 58%)}.flag.da:before,.flag.da:after{content:'';position:absolute;background:#fff}.flag.da:before{left:7px;top:0;width:3px;height:100%}.flag.da:after{left:0;top:6px;width:100%;height:3px}
 .flag.no{background:#ba0c2f}.flag.no:before,.flag.no:after{content:'';position:absolute;background:#fff}.flag.no:before{left:7px;top:0;width:6px;height:100%}.flag.no:after{left:0;top:5px;width:100%;height:6px;background:#00205b}
 .flag.sv{background:#006aa7}.flag.sv:before,.flag.sv:after{content:'';position:absolute;background:#fecc00}.flag.sv:before{left:6px;top:0;width:4px;height:100%}.flag.sv:after{left:0;top:5px;width:100%;height:4px}
 .flag.pl{background:linear-gradient(to bottom,#fff 0 50%,#dc143c 50%)}
+.flag.fi{background:#fff}.flag.fi:before,.flag.fi:after{content:'';position:absolute;background:#003580}.flag.fi:before{left:6px;top:0;width:4px;height:100%}.flag.fi:after{left:0;top:6px;width:100%;height:4px}
+.flag.is{background:#02529c}.flag.is:before,.flag.is:after{content:'';position:absolute;background:#fff}.flag.is:before{left:6px;top:0;width:6px;height:100%}.flag.is:after{left:0;top:5px;width:100%;height:6px;background:#fff}.flag.is{box-shadow:inset 0 0 0 0 #000}
+.flag.is span{display:none}
+.flag.cs{background:linear-gradient(to bottom,#fff 0 50%,#d7141a 50%)}.flag.cs:after{content:'';position:absolute;left:0;top:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #11457e}
+.flag.hu{background:linear-gradient(to bottom,#ce2939 0 33%,#fff 33% 66%,#477050 66%)}
+.flag.ro{background:linear-gradient(to right,#002b7f 0 33%,#fcd116 33% 66%,#ce1126 66%)}
+.flag.gr{background:repeating-linear-gradient(to bottom,#0d5eaf 0 2px,#fff 2px 4px)}.flag.gr:after{content:'';position:absolute;left:0;top:0;width:9px;height:9px;background:#0d5eaf}.flag.gr:before{content:'';position:absolute;left:3px;top:0;width:3px;height:9px;background:#fff;z-index:1;box-shadow:0 3px 0 0 #fff}
+.flag.tr{background:#e30a17}.flag.tr:before{content:'';position:absolute;left:5px;top:3px;width:9px;height:9px;border-radius:50%;background:#fff}.flag.tr:after{content:'';position:absolute;left:8px;top:4px;width:7px;height:7px;border-radius:50%;background:#e30a17}
+.flag.ar{background:#c1272d}.flag.ar:after{content:'★';position:absolute;left:7px;top:-1px;font-size:11px;color:#006233;line-height:15px}
+.flag.bg{background:linear-gradient(to bottom,#fff 0 33%,#00966e 33% 66%,#d62612 66%)}
+.flag.hr{background:linear-gradient(to bottom,#ff0000 0 33%,#fff 33% 66%,#171796 66%)}
+.flag.et{background:linear-gradient(to bottom,#4891d9 0 33%,#000 33% 66%,#fff 66%)}
+.flag.ga{background:linear-gradient(to right,#169b62 0 33%,#fff 33% 66%,#ff883e 66%)}
+.flag.lv{background:linear-gradient(to bottom,#9e3039 0 40%,#fff 40% 60%,#9e3039 60%)}
+.flag.lt{background:linear-gradient(to bottom,#fdb913 0 33%,#006a44 33% 66%,#c1272d 66%)}
+.flag.mt{background:linear-gradient(to right,#fff 0 50%,#cf142b 50%)}.flag.mt:after{content:'✚';position:absolute;left:3px;top:0;font-size:8px;color:#c8102e}
+.flag.sk{background:linear-gradient(to bottom,#fff 0 33%,#0b4ea2 33% 66%,#ee1c25 66%)}
+.flag.sl{background:linear-gradient(to bottom,#fff 0 33%,#0b4ea2 33% 66%,#ee1c25 66%)}
+
 </style>
 </head>
 <body>
@@ -51,6 +70,7 @@ footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
     <h1 id="title">Tholen door de tijd</h1>
     <p id="intro">Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.</p>
     <div class="actions">
+      <button class="btn startbtn" id="start">▶ START DE WANDELING</button>
       <a class="btn" href="Gps_Audio_Stadswandeling_.gpx" download>GPX downloaden</a>
       <button class="btn" id="fit">Route volledig tonen</button>
     </div>
@@ -61,7 +81,7 @@ footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
 <footer>De routekaart is gebaseerd op de aangeleverde GPS-opname.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="route-map-data.js"></script>
-<script src="teksten-data.js"></script>
+<script src="teksten-data_28_talen_FINAL.js"></script>
 <script>
 const LANGS = [
  ["nl","Nederlands","nl-NL","🇳🇱"],["en","English","en-US","🇬🇧"],["de","Deutsch","de-DE","🇩🇪"],
@@ -70,10 +90,10 @@ const LANGS = [
  ["es","Español","es-ES","🇪🇸"],["it","Italiano","it-IT","🇮🇹"],["pt","Português","pt-PT","🇵🇹"],
  ["pl","Polski","pl-PL","🇵🇱"],["cs","Čeština","cs-CZ","🇨🇿"],["hu","Magyar","hu-HU","🇭🇺"],
  ["ro","Română","ro-RO","🇷🇴"],["gr","Ελληνικά","el-GR","🇬🇷"],["tr","Türkçe","tr-TR","🇹🇷"],
- ["ar","العربية المغربية","ar-MA","🇲🇦"],
- ["bg","Български","bg-BG","🇧🇬"], ["hr","Hrvatski","hr-HR","🇭🇷"], ["et","Eesti","et-EE","🇪🇪"],
- ["ga","Gaeilge","ga-IE","🇮🇪"], ["lv","Latviešu","lv-LV","🇱🇻"], ["lt","Lietuvių","lt-LT","🇱🇹"],
- ["mt","Malti","mt-MT","🇲🇹"], ["sk","Slovenčina","sk-SK","🇸🇰"], ["sl","Slovenščina","sl-SI","🇸🇮"]
+ ["ar","العربية المغربية","ar-MA","🇲🇦"],["bg","Български","bg-BG","🇧🇬"],
+ ["hr","Hrvatski","hr-HR","🇭🇷"],["et","Eesti","et-EE","🇪🇪"],["ga","Gaeilge","ga-IE","🇮🇪"],
+ ["lv","Latviešu","lv-LV","🇱🇻"],["lt","Lietuvių","lt-LT","🇱🇹"],["mt","Malti","mt-MT","🇲🇹"],
+ ["sk","Slovenčina","sk-SK","🇸🇰"],["sl","Slovenščina","sl-SI","🇸🇮"]
 ];
 const ui={
  nl:["Tholen door de tijd","Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.","15 haltes · route opgenomen met GPS"],
@@ -118,6 +138,7 @@ ROUTE_MAP_DATA.stops.forEach(s=>{
   stopMarkers.push(m);
 });
 document.getElementById("fit").onclick=()=>map.fitBounds(bounds,{padding:[25,25]});
+document.getElementById("start").onclick=()=>{document.getElementById("map").scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>map.fitBounds(bounds,{padding:[25,25]}),450);};
 
 const langbar=document.getElementById("langbar");
 LANGS.forEach(([code,name,voice,flag])=>{
@@ -144,11 +165,7 @@ async function loadText(lang,nr){
     if(!r.ok) throw new Error();
     return (await r.text()).trim();
   }catch(e){
-    if(window.THOLEN_TEXTS && window.THOLEN_TEXTS.nl && window.THOLEN_TEXTS.nl[String(nr)]){
-      return window.THOLEN_TEXTS.nl[String(nr)];
-    }
-    const r=await fetch(`teksten/nl/stop-${String(nr).padStart(2,"0")}.txt`);
-    return (await r.text()).trim();
+    return "Deze tekst is voor deze taal nog niet beschikbaar.";
   }
 }
 async function renderStops(){
