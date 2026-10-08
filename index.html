@@ -13,6 +13,17 @@ header{padding:18px 18px 12px;background:var(--white);border-bottom:1px solid va
 .langbar{display:flex;flex-wrap:wrap;gap:7px;overflow:visible;padding:12px 0 2px}
 .lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;cursor:pointer}
 .lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lang-current{display:none}
+.lang-options{display:flex;flex-wrap:wrap;gap:7px}
+.lang-arrow{font-size:11px;opacity:.75}
+@media(max-width:799px){
+  .langbar{position:relative;display:block;padding:10px 0 2px}
+  .lang-current{display:flex;width:max-content;min-width:150px;justify-content:center}
+  .lang-options{display:none;position:absolute;left:0;right:0;top:calc(100% + 2px);z-index:1100;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px #0002;max-height:55vh;overflow:auto}
+  .langbar.open .lang-options{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .langbar.open .lang-current .lang-arrow{transform:rotate(180deg)}
+  .lang-options .lang{width:100%;justify-content:flex-start}
+}
 main{max-width:1100px;margin:auto;padding:14px}
 .hero{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
 h1{font-family:Georgia,serif;margin:0 0 7px;font-size:28px}.hero p{margin:0;line-height:1.55}
@@ -141,16 +152,29 @@ document.getElementById("fit").onclick=()=>map.fitBounds(bounds,{padding:[25,25]
 document.getElementById("start").onclick=()=>{document.getElementById("map").scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>map.fitBounds(bounds,{padding:[25,25]}),450);};
 
 const langbar=document.getElementById("langbar");
+const currentLangButton=document.createElement("button");
+currentLangButton.className="lang lang-current";
+currentLangButton.type="button";
+currentLangButton.onclick=()=>langbar.classList.toggle("open");
+langbar.appendChild(currentLangButton);
+const langOptions=document.createElement("div");
+langOptions.className="lang-options";
+langbar.appendChild(langOptions);
 LANGS.forEach(([code,name,voice,flag])=>{
   const b=document.createElement("button");
-  b.className="lang";b.dataset.lang=code;
+  b.className="lang";b.dataset.lang=code;b.type="button";
   b.innerHTML=`<span class="flag ${code}" aria-hidden="true"></span><span>${name}</span>`;
-  b.onclick=()=>setLang(code);langbar.appendChild(b);
+  b.onclick=()=>{setLang(code);langbar.classList.remove("open")};
+  langOptions.appendChild(b);
 });
+document.addEventListener("click",e=>{if(!langbar.contains(e.target)) langbar.classList.remove("open")});
 function setLang(lang){
+  langbar.classList.remove("open");
   if(window.tholenAudio){window.tholenAudio.pause();window.tholenAudio=null;} currentLang=lang; localStorage.setItem("tholen-lang",lang);
   document.documentElement.lang=lang;
-  document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  document.querySelectorAll(".lang-options .lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  const chosen=LANGS.find(x=>x[0]===lang)||LANGS[0];
+  currentLangButton.innerHTML=`<span class="flag ${chosen[0]}" aria-hidden="true"></span><span>${chosen[1]}</span><span class="lang-arrow">▾</span>`;
   document.getElementById("title").textContent=ui[lang][0];
   document.getElementById("intro").textContent=ui[lang][1];
   document.getElementById("subtitle").textContent=ui[lang][2];
