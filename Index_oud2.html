@@ -169,7 +169,6 @@ LANGS.forEach(([code,name,voice,flag])=>{
 });
 document.addEventListener("click",e=>{if(!langbar.contains(e.target)) langbar.classList.remove("open")});
 function setLang(lang){
-  langbar.classList.remove("open");
   if(window.tholenAudio){window.tholenAudio.pause();window.tholenAudio=null;} currentLang=lang; localStorage.setItem("tholen-lang",lang);
   document.documentElement.lang=lang;
   document.querySelectorAll(".lang-options .lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
