@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tholen door de tijd — historische audiowandeling</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--ink:#17322f;--paper:#f7f4ed;--line:#d8d1c4;--accent:#8b6f47;--white:#fff}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:18px 18px 12px;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}
+.brand{font-family:Georgia,serif;font-size:22px;font-weight:700}.sub{font-size:13px;opacity:.72;margin-top:3px}
+.langbar{display:flex;flex-wrap:wrap;gap:7px;overflow:visible;padding:12px 0 2px}
+.lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;cursor:pointer}
+.lang.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lang-current{display:none}
+.lang-options{display:flex;flex-wrap:wrap;gap:7px}
+.lang-arrow{font-size:11px;opacity:.75}
+@media(max-width:799px){
+  .langbar{position:relative;display:block;padding:10px 0 2px}
+  .lang-current{display:flex;width:max-content;min-width:150px;justify-content:center}
+  .lang-options{display:none;position:absolute;left:0;right:0;top:calc(100% + 2px);z-index:1100;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px #0002;max-height:55vh;overflow:auto}
+  .langbar.open .lang-options{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .langbar.open .lang-current .lang-arrow{transform:rotate(180deg)}
+  .lang-options .lang{width:100%;justify-content:flex-start}
+}
+main{max-width:1100px;margin:auto;padding:14px}
+.hero{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+h1{font-family:Georgia,serif;margin:0 0 7px;font-size:28px}.hero p{margin:0;line-height:1.55}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;text-decoration:none;color:inherit;font-weight:600;cursor:pointer}
+#map{height:56vh;min-height:380px;border-radius:18px;border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:9px 0}
+.stophead{display:flex;gap:11px;align-items:flex-start}.num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.stoptitle{font-weight:750;font-size:16px}.small{font-size:13px;opacity:.7;margin-top:3px}
+.stop-actions{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}.play{background:var(--ink);color:#fff;border:0}.startbtn{background:var(--ink);color:#fff;border-color:var(--ink);font-size:18px;padding:13px 18px}
+footer{padding:22px 14px 40px;text-align:center;font-size:12px;opacity:.65}
+.leaflet-popup-content{font-family:system-ui,sans-serif}.marker{background:var(--ink);color:#fff;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px #0004;font-weight:700}
+@media(min-width:800px){.hero{padding:24px}h1{font-size:34px}}
+.audio-player audio{display:block}
+.flag{width:22px;height:15px;display:inline-block;border:1px solid #aaa;border-radius:2px;overflow:hidden;position:relative;flex:none}
+.flag.nl{background:linear-gradient(to bottom,#ae1c28 0 33%,#fff 33% 66%,#21468b 66%)}
+.flag.en{background:#fff}.flag.en:before{content:'';position:absolute;left:9px;top:0;width:4px;height:100%;background:#c8102e}.flag.en:after{content:'';position:absolute;left:0;top:5px;width:100%;height:4px;background:#c8102e}
+.flag.de{background:linear-gradient(to bottom,#000 0 33%,#dd0000 33% 66%,#ffce00 66%)}
+.flag.fr{background:linear-gradient(to right,#0055a4 0 33%,#fff 33% 66%,#ef4135 66%)}
+.flag.it{background:linear-gradient(to right,#009246 0 33%,#fff 33% 66%,#ce2b37 66%)}
+.flag.es{background:linear-gradient(to bottom,#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)}
+.flag.pt{background:linear-gradient(to right,#046a38 0 40%,#da291c 40%)}.flag.pt:after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-radius:50%;background:#f5c242}
+.flag.da{background:linear-gradient(to right,transparent 0 36%,#fff 36% 46%,transparent 46%),linear-gradient(to bottom,#c8102e 0 42%,#fff 42% 58%,#c8102e 58%)}.flag.da:before,.flag.da:after{content:'';position:absolute;background:#fff}.flag.da:before{left:7px;top:0;width:3px;height:100%}.flag.da:after{left:0;top:6px;width:100%;height:3px}
+.flag.no{background:#ba0c2f}.flag.no:before,.flag.no:after{content:'';position:absolute;background:#fff}.flag.no:before{left:7px;top:0;width:6px;height:100%}.flag.no:after{left:0;top:5px;width:100%;height:6px;background:#00205b}
+.flag.sv{background:#006aa7}.flag.sv:before,.flag.sv:after{content:'';position:absolute;background:#fecc00}.flag.sv:before{left:6px;top:0;width:4px;height:100%}.flag.sv:after{left:0;top:5px;width:100%;height:4px}
+.flag.pl{background:linear-gradient(to bottom,#fff 0 50%,#dc143c 50%)}
+.flag.fi{background:#fff}.flag.fi:before,.flag.fi:after{content:'';position:absolute;background:#003580}.flag.fi:before{left:6px;top:0;width:4px;height:100%}.flag.fi:after{left:0;top:6px;width:100%;height:4px}
+.flag.is{background:#02529c}.flag.is:before,.flag.is:after{content:'';position:absolute;background:#fff}.flag.is:before{left:6px;top:0;width:6px;height:100%}.flag.is:after{left:0;top:5px;width:100%;height:6px;background:#fff}.flag.is{box-shadow:inset 0 0 0 0 #000}
+.flag.is span{display:none}
+.flag.cs{background:linear-gradient(to bottom,#fff 0 50%,#d7141a 50%)}.flag.cs:after{content:'';position:absolute;left:0;top:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #11457e}
+.flag.hu{background:linear-gradient(to bottom,#ce2939 0 33%,#fff 33% 66%,#477050 66%)}
+.flag.ro{background:linear-gradient(to right,#002b7f 0 33%,#fcd116 33% 66%,#ce1126 66%)}
+.flag.gr{background:repeating-linear-gradient(to bottom,#0d5eaf 0 2px,#fff 2px 4px)}.flag.gr:after{content:'';position:absolute;left:0;top:0;width:9px;height:9px;background:#0d5eaf}.flag.gr:before{content:'';position:absolute;left:3px;top:0;width:3px;height:9px;background:#fff;z-index:1;box-shadow:0 3px 0 0 #fff}
+.flag.tr{background:#e30a17}.flag.tr:before{content:'';position:absolute;left:5px;top:3px;width:9px;height:9px;border-radius:50%;background:#fff}.flag.tr:after{content:'';position:absolute;left:8px;top:4px;width:7px;height:7px;border-radius:50%;background:#e30a17}
+.flag.ar{background:#c1272d}.flag.ar:after{content:'★';position:absolute;left:7px;top:-1px;font-size:11px;color:#006233;line-height:15px}
+.flag.bg{background:linear-gradient(to bottom,#fff 0 33%,#00966e 33% 66%,#d62612 66%)}
+.flag.hr{background:linear-gradient(to bottom,#ff0000 0 33%,#fff 33% 66%,#171796 66%)}
+.flag.et{background:linear-gradient(to bottom,#4891d9 0 33%,#000 33% 66%,#fff 66%)}
+.flag.ga{background:linear-gradient(to right,#169b62 0 33%,#fff 33% 66%,#ff883e 66%)}
+.flag.lv{background:linear-gradient(to bottom,#9e3039 0 40%,#fff 40% 60%,#9e3039 60%)}
+.flag.lt{background:linear-gradient(to bottom,#fdb913 0 33%,#006a44 33% 66%,#c1272d 66%)}
+.flag.mt{background:linear-gradient(to right,#fff 0 50%,#cf142b 50%)}.flag.mt:after{content:'✚';position:absolute;left:3px;top:0;font-size:8px;color:#c8102e}
+.flag.sk{background:linear-gradient(to bottom,#fff 0 33%,#0b4ea2 33% 66%,#ee1c25 66%)}
+.flag.sl{background:linear-gradient(to bottom,#fff 0 33%,#0b4ea2 33% 66%,#ee1c25 66%)}
+
+.feedback-card h2{margin:0 0 8px;font-size:21px}.feedback-card p{line-height:1.45}.rating-options{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}.rating-option{position:relative;display:inline-flex;align-items:center;justify-content:center}.rating-option input{position:absolute;opacity:0;width:1px;height:1px}.rating-option label{font-size:31px;line-height:1;padding:4px;border-radius:8px;cursor:pointer;color:#c7c0b4}.rating-option input:checked+label,.rating-option label:hover{color:#e0a323}.rating-option input:focus-visible+label{outline:3px solid #276ef1}.feedback-card textarea{display:block;width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin:6px 0 12px}.feedback-status{font-size:14px;margin-top:10px;font-weight:600}.feedback-privacy{font-size:12px;opacity:.72}.feedback-card[hidden]{display:none!important}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Historische Audiowandeling Tholen</div>
+  <div class="sub" id="subtitle">15 haltes · route opgenomen met GPS</div>
+  <div class="langbar" id="langbar"></div>
+</header>
+<main>
+  <section class="hero">
+    <h1 id="title">Tholen door de tijd</h1>
+    <p id="intro">Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.</p>
+    <div class="actions">
+      <button class="btn startbtn" id="start">▶ START DE WANDELING</button>
+      <button class="btn" id="navigateNearest" type="button">Navigeer naar dichtstbijzijnde halte</button>
+      <a class="btn" href="Gps_Audio_Stadswandeling_.gpx" download>GPX downloaden</a>
+      <button class="btn" id="fit">Route volledig tonen</button>
+      <button class="btn" id="openFeedback" type="button">Beoordeel wandeling</button>
+    </div>
+  </section>
+  <div id="map"></div>
+  <section id="stops"></section>
+<section id="feedbackSection" class="card feedback-card" hidden aria-labelledby="feedbackTitle">
+  <h2 id="feedbackTitle">Hoe vond u de wandeling in het algemeen?</h2>
+  <p id="feedbackIntro">Uw beoordeling helpt ons de audiowandeling te verbeteren.</p>
+  <form id="feedbackForm">
+    <fieldset style="border:0;padding:0;margin:0">
+      <legend id="feedbackRatingLabel">Geef 1 tot 5 sterren</legend>
+      <div class="rating-options" role="radiogroup" aria-labelledby="feedbackRatingLabel">
+        <span class="rating-option"><input id="rating1" type="radio" name="rating" value="1" required><label for="rating1" aria-label="1 ster">★</label></span>
+        <span class="rating-option"><input id="rating2" type="radio" name="rating" value="2"><label for="rating2" aria-label="2 sterren">★</label></span>
+        <span class="rating-option"><input id="rating3" type="radio" name="rating" value="3"><label for="rating3" aria-label="3 sterren">★</label></span>
+        <span class="rating-option"><input id="rating4" type="radio" name="rating" value="4"><label for="rating4" aria-label="4 sterren">★</label></span>
+        <span class="rating-option"><input id="rating5" type="radio" name="rating" value="5"><label for="rating5" aria-label="5 sterren">★</label></span>
+      </div>
+    </fieldset>
+    <p id="feedbackScale">1 = niet goed · 5 = uitstekend</p>
+    <label id="feedbackCommentLabel" for="feedbackComment">Opmerking (optioneel)</label>
+    <textarea id="feedbackComment" maxlength="500" placeholder="Wat vond u goed of wat kan beter?"></textarea>
+    <button class="btn play" id="feedbackSubmit" type="submit">Verstuur beoordeling</button>
+    <p class="feedback-privacy" id="feedbackPrivacy">Anoniem: we slaan alleen gekozen taal, tijdstip, beoordeling en eventuele opmerking op. Vul geen namen of contactgegevens in.</p>
+    <p class="feedback-status" id="feedbackStatus" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+</main>
+<footer>De routekaart is gebaseerd op de aangeleverde GPS-opname.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="route-map-data.js"></script>
+<script src="teksten-data_28_talen_FINAL.js"></script>
+<script>
+const LANGS = [
+ ["nl","Nederlands","nl-NL","🇳🇱"],["en","English","en-US","🇬🇧"],["de","Deutsch","de-DE","🇩🇪"],
+ ["fr","Français","fr-FR","🇫🇷"],["fi","Suomi","fi-FI","🇫🇮"],["sv","Svenska","sv-SE","🇸🇪"],
+ ["no","Norsk","nb-NO","🇳🇴"],["da","Dansk","da-DK","🇩🇰"],["is","Íslenska","is-IS","🇮🇸"],
+ ["es","Español","es-ES","🇪🇸"],["it","Italiano","it-IT","🇮🇹"],["pt","Português","pt-PT","🇵🇹"],
+ ["pl","Polski","pl-PL","🇵🇱"],["cs","Čeština","cs-CZ","🇨🇿"],["hu","Magyar","hu-HU","🇭🇺"],
+ ["ro","Română","ro-RO","🇷🇴"],["gr","Ελληνικά","el-GR","🇬🇷"],["tr","Türkçe","tr-TR","🇹🇷"],
+ ["ar","العربية المغربية","ar-MA","🇲🇦"],["bg","Български","bg-BG","🇧🇬"],
+ ["hr","Hrvatski","hr-HR","🇭🇷"],["et","Eesti","et-EE","🇪🇪"],["ga","Gaeilge","ga-IE","🇮🇪"],
+ ["lv","Latviešu","lv-LV","🇱🇻"],["lt","Lietuvių","lt-LT","🇱🇹"],["mt","Malti","mt-MT","🇲🇹"],
+ ["sk","Slovenčina","sk-SK","🇸🇰"],["sl","Slovenščina","sl-SI","🇸🇮"]
+];
+const ui={
+ nl:["Tholen door de tijd","Volg de werkelijk gelopen route en ontdek de historische binnenstad halte voor halte.","15 haltes · route opgenomen met GPS"],
+ en:["Tholen through time","Follow the actual recorded route and discover the historic town, stop by stop.","15 stops · route recorded by GPS"],
+ de:["Tholen durch die Zeit","Folgen Sie der tatsächlich aufgezeichneten Route und entdecken Sie die historische Altstadt.","15 Stationen · GPS-Aufzeichnung"],
+ fr:["Tholen à travers le temps","Suivez l’itinéraire réellement enregistré et découvrez la ville historique.","15 étapes · itinéraire GPS"],
+ it:["Tholen nel tempo","Segui il percorso realmente registrato e scopri il centro storico.","15 tappe · percorso GPS"],
+ es:["Tholen a través del tiempo","Sigue la ruta realmente registrada y descubre el centro histórico.","15 paradas · ruta GPS"],
+ pt:["Tholen através do tempo","Siga o percurso realmente registado e descubra o centro histórico.","15 paragens · percurso GPS"],
+ da:["Tholen gennem tiden","Følg den faktisk registrerede rute og oplev den historiske by.","15 stop · GPS-rute"],
+ no:["Tholen gjennom tidene","Følg den registrerte ruten og oppdag den historiske byen.","15 stopp · GPS-rute"],
+ fi:["Tholen ajan halki","Seuraa tallennettua reittiä ja tutustu historialliseen kaupunkiin pysäkki pysäkiltä.","15 pysäkkiä · GPS-reitti"],
+ sv:["Tholen genom tiderna","Följ den inspelade rutten och upptäck den historiska staden.","15 stopp · GPS-rutt"],
+ is:["Tholen í gegnum aldirnar","Fylgdu skráðu gönguleiðinni og uppgötvaðu sögulega miðbæinn.","15 stopp · GPS-leið"],
+ pl:["Tholen na przestrzeni dziejów","Podążaj zarejestrowaną trasą i odkrywaj historyczne centrum miasta.","15 przystanków · trasa GPS"],
+ cs:["Tholen v průběhu času","Sledujte zaznamenanou trasu a objevujte historické město zastávku po zastávce.","15 zastávek · GPS trasa"],
+ hu:["Tholen az idők során","Kövesse a rögzített útvonalat, és fedezze fel a történelmi várost megállóról megállóra.","15 megálló · GPS-útvonal"],
+ ro:["Tholen de-a lungul timpului","Urmați traseul înregistrat și descoperiți orașul istoric, oprire cu oprire.","15 opriri · traseu GPS"],
+ gr:["Το Tholen μέσα στον χρόνο","Ακολουθήστε τη διαδρομή που καταγράφηκε και ανακαλύψτε την ιστορική πόλη στάση προς στάση.","15 στάσεις · διαδρομή GPS"],
+ tr:["Tholen zaman içinde","Kaydedilmiş rotayı takip edin ve tarihi kenti durak durak keşfedin.","15 durak · GPS rotası"],
+ ar:["ثولن عبر الزمن","اتبعوا المسار المسجّل واكتشفوا المدينة التاريخية محطةً بعد محطة.","15 محطة · مسار GPS"],
+ bg:["Tholen през времето","Следвайте записания маршрут и откривайте историческия град спирка по спирка.","15 спирки · GPS маршрут"],
+ hr:["Tholen kroz vrijeme","Slijedite snimljenu rutu i otkrivajte povijesni grad postaju po postaju.","15 postaja · GPS ruta"],
+ et:["Tholen läbi aegade","Järgige salvestatud marsruuti ja avastage ajaloolist linna peatus peatuse haaval.","15 peatust · GPS-marsruut"],
+ ga:["Tholen trí na haoiseanna","Lean an bealach taifeadta agus faigh amach faoin mbaile stairiúil, stad ar stad.","15 stad · bealach GPS"],
+ lv:["Tholen cauri laikiem","Sekojiet ierakstītajam maršrutam un atklājiet vēsturisko pilsētu pa pieturai.","15 pieturas · GPS maršruts"],
+ lt:["Tholen per amžius","Sekite įrašytu maršrutu ir atraskite istorinį miestą, stotelę po stotelės.","15 stotelių · GPS maršrutas"],
+ mt:["Tholen matul iż-żmien","Segwi r-rotta rreġistrata u skopri l-belt storika, waqfa wara l-oħra.","15-il waqfa · rotta GPS"],
+ sk:["Tholen v priebehu času","Sledujte zaznamenanú trasu a objavujte historické mesto zastávku po zastávke.","15 zastávok · GPS trasa"],
+ sl:["Tholen skozi čas","Sledite posneti poti in odkrivajte zgodovinsko mesto, postajo za postajo.","15 postaj · pot GPS"]
+};
+const navigateLabels={
+ nl:"Navigeer naar dichtstbijzijnde halte",en:"Navigate to nearest stop",de:"Zur nächsten Haltestelle navigieren",fr:"Naviguer vers l’arrêt le plus proche",
+ es:"Navegar a la parada más cercana",it:"Naviga alla fermata più vicina",pt:"Navegar para a paragem mais próxima",da:"Naviger til nærmeste stop",no:"Naviger til nærmeste stopp",sv:"Navigera till närmaste stopp",fi:"Navigoi lähimmälle pysäkille",pl:"Nawiguj do najbliższego przystanku"
+};
+let currentLang="nl";
+const map=L.map("map",{zoomControl:true}).setView([51.5318,4.2208],16);
+L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{maxZoom:20,subdomains:["a","b","c"],attribution:'© OpenStreetMap contributors, tiles © OSM France'}).addTo(map);
+const latlngs=ROUTE_MAP_DATA.track.map(p=>[p[0],p[1]]);
+const line=L.polyline(latlngs,{color:"#17322f",weight:5,opacity:.9}).addTo(map);
+const bounds=line.getBounds();
+const stopMarkers=[];
+ROUTE_MAP_DATA.stops.forEach(s=>{
+  const icon=L.divIcon({className:"",html:`<div class="marker">${s.nr}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+  const m=L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(`<b>${s.nr}. ${s.title}</b>`);
+  stopMarkers.push(m);
+});
+document.getElementById("fit").onclick=()=>map.fitBounds(bounds,{padding:[25,25]});
+document.getElementById("start").onclick=()=>{document.getElementById("map").scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>map.fitBounds(bounds,{padding:[25,25]}),450);};
+
+const langbar=document.getElementById("langbar");
+const currentLangButton=document.createElement("button");
+currentLangButton.className="lang lang-current";
+currentLangButton.type="button";
+currentLangButton.onclick=()=>langbar.classList.toggle("open");
+langbar.appendChild(currentLangButton);
+const langOptions=document.createElement("div");
+langOptions.className="lang-options";
+langbar.appendChild(langOptions);
+LANGS.forEach(([code,name,voice,flag])=>{
+  const b=document.createElement("button");
+  b.className="lang";b.dataset.lang=code;b.type="button";
+  b.innerHTML=`<span class="flag ${code}" aria-hidden="true"></span><span>${name}</span>`;
+  b.onclick=()=>{setLang(code);langbar.classList.remove("open")};
+  langOptions.appendChild(b);
+});
+document.addEventListener("click",e=>{if(!langbar.contains(e.target)) langbar.classList.remove("open")});
+const feedbackUi={
+ nl:{button:"Beoordeel wandeling",title:"Hoe vond u de wandeling in het algemeen?",intro:"Uw beoordeling helpt ons de audiowandeling te verbeteren.",rating:"Geef 1 tot 5 sterren",scale:"1 = niet goed · 5 = uitstekend",comment:"Opmerking (optioneel)",placeholder:"Wat vond u goed of wat kan beter?",submit:"Verstuur beoordeling",thanks:"Bedankt voor uw beoordeling!",error:"Versturen lukte niet. Controleer de internetverbinding en probeer opnieuw.",privacy:"Anoniem: we slaan alleen gekozen taal, tijdstip, beoordeling en eventuele opmerking op. Vul geen namen of contactgegevens in."},
+ en:{button:"Rate the walk",title:"How did you like the walk overall?",intro:"Your feedback helps us improve the audio walk.",rating:"Give 1 to 5 stars",scale:"1 = poor · 5 = excellent",comment:"Comment (optional)",placeholder:"What did you like, or what could be improved?",submit:"Send feedback",thanks:"Thank you for your feedback!",error:"Could not send. Check your connection and try again.",privacy:"Anonymous: we store only the chosen language, time, rating and optional comment. Please do not enter names or contact details."},
+ de:{button:"Wanderung bewerten",title:"Wie hat Ihnen die Wanderung insgesamt gefallen?",intro:"Ihre Rückmeldung hilft uns, den Audioweg zu verbessern.",rating:"1 bis 5 Sterne vergeben",scale:"1 = schlecht · 5 = ausgezeichnet",comment:"Kommentar (optional)",placeholder:"Was hat Ihnen gefallen, was könnten wir verbessern?",submit:"Bewertung senden",thanks:"Vielen Dank für Ihre Bewertung!",error:"Senden fehlgeschlagen. Prüfen Sie die Verbindung und versuchen Sie es erneut.",privacy:"Anonym: gespeichert werden nur Sprache, Zeitpunkt, Bewertung und optionaler Kommentar. Bitte keine Namen oder Kontaktdaten angeben."},
+ fr:{button:"Évaluer la promenade",title:"Comment avez-vous trouvé la promenade dans l’ensemble ?",intro:"Votre avis nous aide à améliorer l’audiopromenade.",rating:"Attribuez de 1 à 5 étoiles",scale:"1 = mauvais · 5 = excellent",comment:"Commentaire (facultatif)",placeholder:"Qu’avez-vous aimé ou que pourrions-nous améliorer ?",submit:"Envoyer l’avis",thanks:"Merci pour votre avis !",error:"Envoi impossible. Vérifiez la connexion et réessayez.",privacy:"Anonyme : nous enregistrons uniquement la langue choisie, l’heure, la note et un commentaire facultatif. N’indiquez aucun nom ni coordonnées."},
+ fi:{button:"Arvioi kävely",title:"Mitä pidit kävelystä kokonaisuutena?",intro:"Palautteesi auttaa meitä parantamaan audiokierrosta.",rating:"Anna 1–5 tähteä",scale:"1 = huono · 5 = erinomainen",comment:"Kommentti (valinnainen)",placeholder:"Mistä pidit tai mitä voisi parantaa?",submit:"Lähetä palaute",thanks:"Kiitos palautteestasi!",error:"Lähetys ei onnistunut. Tarkista yhteys ja yritä uudelleen.",privacy:"Anonyymi palaute: tallennamme vain valitun kielen, ajan, arvion ja valinnaisen kommentin. Älä anna nimiä tai yhteystietoja."},
+ sv:{button:"Betygsätt promenaden",title:"Vad tyckte du om promenaden som helhet?",intro:"Din feedback hjälper oss att förbättra ljudpromenaden.",rating:"Ge 1–5 stjärnor",scale:"1 = dålig · 5 = utmärkt",comment:"Kommentar (valfritt)",placeholder:"Vad tyckte du om eller vad kan förbättras?",submit:"Skicka omdöme",thanks:"Tack för ditt omdöme!",error:"Det gick inte att skicka. Kontrollera anslutningen och försök igen.",privacy:"Anonymt: vi sparar bara valt språk, tid, betyg och eventuell kommentar. Ange inga namn eller kontaktuppgifter."},
+ no:{button:"Vurder turen",title:"Hva syntes du om turen totalt sett?",intro:"Tilbakemeldingen din hjelper oss å forbedre lydturen.",rating:"Gi 1–5 stjerner",scale:"1 = dårlig · 5 = utmerket",comment:"Kommentar (valgfritt)",placeholder:"Hva likte du, eller hva kan forbedres?",submit:"Send vurdering",thanks:"Takk for tilbakemeldingen!",error:"Kunne ikke sende. Kontroller forbindelsen og prøv igjen.",privacy:"Anonymt: Vi lagrer bare valgt språk, tidspunkt, vurdering og eventuell kommentar. Ikke skriv navn eller kontaktinformasjon."},
+ da:{button:"Bedøm turen",title:"Hvad syntes du samlet set om gåturen?",intro:"Din feedback hjælper os med at forbedre lydvandringen.",rating:"Giv 1–5 stjerner",scale:"1 = dårlig · 5 = fremragende",comment:"Kommentar (valgfri)",placeholder:"Hvad kunne du lide, eller hvad kan forbedres?",submit:"Send bedømmelse",thanks:"Tak for din feedback!",error:"Kunne ikke sende. Kontrollér forbindelsen, og prøv igen.",privacy:"Anonymt: Vi gemmer kun valgt sprog, tidspunkt, bedømmelse og eventuel kommentar. Skriv ikke navn eller kontaktoplysninger."},
+ is:{button:"Meta gönguna",title:"Hvernig fannst þér gönguferðin í heild?",intro:"Álit þitt hjálpar okkur að bæta hljóðgönguna.",rating:"Gefðu 1–5 stjörnur",scale:"1 = léleg · 5 = frábær",comment:"Athugasemd (valfrjálst)",placeholder:"Hvað líkaði þér eða hvað mætti bæta?",submit:"Senda álit",thanks:"Takk fyrir álitið!",error:"Ekki tókst að senda. Athugaðu tenginguna og reyndu aftur.",privacy:"Nafnlaust: við vistum aðeins valið tungumál, tíma, einkunn og valfrjálsa athugasemd. Ekki slá inn nöfn eða samskiptaupplýsingar."},
+ es:{button:"Valorar el paseo",title:"¿Qué le pareció el paseo en general?",intro:"Su opinión nos ayuda a mejorar la audioguía.",rating:"Dé de 1 a 5 estrellas",scale:"1 = malo · 5 = excelente",comment:"Comentario (opcional)",placeholder:"¿Qué le gustó o qué podríamos mejorar?",submit:"Enviar valoración",thanks:"¡Gracias por su valoración!",error:"No se pudo enviar. Compruebe la conexión e inténtelo de nuevo.",privacy:"Anónimo: solo guardamos idioma, hora, puntuación y comentario opcional. No introduzca nombres ni datos de contacto."},
+ it:{button:"Valuta la passeggiata",title:"Come hai trovato la passeggiata nel complesso?",intro:"Il tuo parere ci aiuta a migliorare il percorso audio.",rating:"Dai da 1 a 5 stelle",scale:"1 = scarso · 5 = eccellente",comment:"Commento (facoltativo)",placeholder:"Cosa ti è piaciuto o cosa potremmo migliorare?",submit:"Invia valutazione",thanks:"Grazie per il tuo parere!",error:"Invio non riuscito. Controlla la connessione e riprova.",privacy:"Anonimo: salviamo solo lingua scelta, orario, valutazione e commento facoltativo. Non inserire nomi o recapiti."},
+ pt:{button:"Avaliar o passeio",title:"De modo geral, o que achou do passeio?",intro:"A sua opinião ajuda-nos a melhorar o percurso áudio.",rating:"Dê de 1 a 5 estrelas",scale:"1 = fraco · 5 = excelente",comment:"Comentário (opcional)",placeholder:"Do que gostou ou o que podemos melhorar?",submit:"Enviar avaliação",thanks:"Obrigado pela sua avaliação!",error:"Não foi possível enviar. Verifique a ligação e tente novamente.",privacy:"Anónimo: guardamos apenas o idioma escolhido, a hora, a avaliação e o comentário opcional. Não introduza nomes nem contactos."},
+ pl:{button:"Oceń spacer",title:"Jak ogólnie podobał Ci się spacer?",intro:"Twoja opinia pomoże nam ulepszyć audiowycieczkę.",rating:"Oceń od 1 do 5 gwiazdek",scale:"1 = słabo · 5 = doskonale",comment:"Komentarz (opcjonalnie)",placeholder:"Co Ci się podobało lub co można poprawić?",submit:"Wyślij opinię",thanks:"Dziękujemy za opinię!",error:"Nie udało się wysłać. Sprawdź połączenie i spróbuj ponownie.",privacy:"Anonimowo: zapisujemy tylko wybrany język, czas, ocenę i opcjonalny komentarz. Nie podawaj nazwisk ani danych kontaktowych."},
+ cs:{button:"Ohodnotit procházku",title:"Jak se vám procházka celkově líbila?",intro:"Vaše zpětná vazba nám pomůže audioprocházku zlepšit.",rating:"Ohodnoťte 1 až 5 hvězdičkami",scale:"1 = špatná · 5 = výborná",comment:"Komentář (volitelný)",placeholder:"Co se vám líbilo nebo co lze zlepšit?",submit:"Odeslat hodnocení",thanks:"Děkujeme za hodnocení!",error:"Odeslání se nezdařilo. Zkontrolujte připojení a zkuste to znovu.",privacy:"Anonymně: ukládáme pouze jazyk, čas, hodnocení a volitelný komentář. Neuvádějte jména ani kontaktní údaje."},
+ hu:{button:"Értékelje a sétát",title:"Összességében hogy tetszett a séta?",intro:"Visszajelzése segít javítani a hangos sétánkat.",rating:"Adjon 1–5 csillagot",scale:"1 = rossz · 5 = kiváló",comment:"Megjegyzés (nem kötelező)",placeholder:"Mi tetszett, vagy min lehetne javítani?",submit:"Értékelés elküldése",thanks:"Köszönjük az értékelést!",error:"Nem sikerült elküldeni. Ellenőrizze a kapcsolatot, majd próbálja újra.",privacy:"Névtelen: csak a nyelvet, időpontot, értékelést és az opcionális megjegyzést tároljuk. Ne adjon meg nevet vagy elérhetőséget."},
+ ro:{button:"Evaluează plimbarea",title:"Cum vi s-a părut plimbarea în general?",intro:"Părerea dvs. ne ajută să îmbunătățim turul audio.",rating:"Acordați 1–5 stele",scale:"1 = slab · 5 = excelent",comment:"Comentariu (opțional)",placeholder:"Ce v-a plăcut sau ce am putea îmbunătăți?",submit:"Trimite evaluarea",thanks:"Vă mulțumim pentru evaluare!",error:"Trimiterea nu a reușit. Verificați conexiunea și încercați din nou.",privacy:"Anonim: salvăm doar limba, ora, nota și comentariul opțional. Nu introduceți nume sau date de contact."},
+ gr:{button:"Αξιολογήστε τη διαδρομή",title:"Πώς σας φάνηκε συνολικά η βόλτα;",intro:"Η γνώμη σας μάς βοηθά να βελτιώσουμε την ηχητική ξενάγηση.",rating:"Δώστε 1–5 αστέρια",scale:"1 = κακή · 5 = εξαιρετική",comment:"Σχόλιο (προαιρετικό)",placeholder:"Τι σας άρεσε ή τι θα μπορούσαμε να βελτιώσουμε;",submit:"Αποστολή αξιολόγησης",thanks:"Ευχαριστούμε για την αξιολόγηση!",error:"Η αποστολή απέτυχε. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά.",privacy:"Ανώνυμα: αποθηκεύουμε μόνο γλώσσα, ώρα, βαθμολογία και προαιρετικό σχόλιο. Μην εισάγετε ονόματα ή στοιχεία επικοινωνίας."},
+ tr:{button:"Yürüyüşü değerlendirin",title:"Yürüyüşü genel olarak nasıl buldunuz?",intro:"Görüşünüz sesli yürüyüşü geliştirmemize yardımcı olur.",rating:"1–5 yıldız verin",scale:"1 = kötü · 5 = mükemmel",comment:"Yorum (isteğe bağlı)",placeholder:"Neyi beğendiniz veya neyi geliştirebiliriz?",submit:"Değerlendirmeyi gönder",thanks:"Görüşünüz için teşekkürler!",error:"Gönderilemedi. Bağlantınızı kontrol edip yeniden deneyin.",privacy:"Anonim: yalnızca dil, saat, puan ve isteğe bağlı yorum kaydedilir. İsim veya iletişim bilgisi girmeyin."},
+ ar:{button:"قيّم الجولة",title:"ما رأيك في الجولة بشكل عام؟",intro:"يساعدنا رأيك على تحسين الجولة الصوتية.",rating:"اختر من نجمة إلى خمس نجوم",scale:"1 = ضعيف · 5 = ممتاز",comment:"تعليق (اختياري)",placeholder:"ما الذي أعجبك أو ما الذي يمكن تحسينه؟",submit:"إرسال التقييم",thanks:"شكراً على تقييمك!",error:"تعذر الإرسال. تحقق من الاتصال وحاول مرة أخرى.",privacy:"بشكل مجهول: نحفظ اللغة والوقت والتقييم والتعليق الاختياري فقط. لا تكتب الاسم أو معلومات الاتصال."},
+ bg:{button:"Оценете разходката",title:"Как ви хареса разходката като цяло?",intro:"Вашето мнение ни помага да подобрим аудиоразходката.",rating:"Дайте от 1 до 5 звезди",scale:"1 = слабо · 5 = отлично",comment:"Коментар (по желание)",placeholder:"Какво ви хареса или какво можем да подобрим?",submit:"Изпрати оценката",thanks:"Благодарим за оценката!",error:"Изпращането не бе успешно. Проверете връзката и опитайте отново.",privacy:"Анонимно: съхраняваме само език, час, оценка и незадължителен коментар. Не въвеждайте имена или данни за контакт."},
+ hr:{button:"Ocijeni šetnju",title:"Kako vam se šetnja općenito svidjela?",intro:"Vaše mišljenje pomaže nam poboljšati audiošetnju.",rating:"Dajte 1–5 zvjezdica",scale:"1 = loše · 5 = izvrsno",comment:"Komentar (neobavezno)",placeholder:"Što vam se svidjelo ili što možemo poboljšati?",submit:"Pošalji ocjenu",thanks:"Hvala na ocjeni!",error:"Slanje nije uspjelo. Provjerite vezu i pokušajte ponovno.",privacy:"Anonimno: spremamo samo jezik, vrijeme, ocjenu i neobavezni komentar. Nemojte unositi imena ni kontaktne podatke."},
+ et:{button:"Hinda jalutuskäiku",title:"Kuidas teile jalutuskäik üldiselt meeldis?",intro:"Teie tagasiside aitab meil audiotuuri parandada.",rating:"Andke 1–5 tärni",scale:"1 = kehv · 5 = suurepärane",comment:"Kommentaar (valikuline)",placeholder:"Mis teile meeldis või mida saaks parandada?",submit:"Saada hinnang",thanks:"Täname tagasiside eest!",error:"Saatmine ebaõnnestus. Kontrollige ühendust ja proovige uuesti.",privacy:"Anonüümselt: salvestame ainult keele, aja, hinnangu ja valikulise kommentaari. Ärge sisestage nimesid ega kontaktandmeid."},
+ ga:{button:"Déan measúnú ar an tsiúlóid",title:"Cén tuairim a bhí agat faoin tsiúlóid ar an iomlán?",intro:"Cabhraíonn d’aiseolas linn an tsiúlóid fuaime a fheabhsú.",rating:"Tabhair 1–5 réalta",scale:"1 = dona · 5 = ar fheabhas",comment:"Trácht (roghnach)",placeholder:"Cad a thaitin leat nó cad a d’fhéadfaí a fheabhsú?",submit:"Seol an measúnú",thanks:"Go raibh maith agat as d’aiseolas!",error:"Níor éirigh leis an seoladh. Seiceáil an nasc agus bain triail eile as.",privacy:"Gan ainm: ní shábhálaimid ach an teanga, an t-am, an rátáil agus trácht roghnach. Ná cuir ainm ná sonraí teagmhála isteach."},
+ lv:{button:"Novērtēt pastaigu",title:"Kā jums kopumā patika pastaiga?",intro:"Jūsu atsauksme palīdz uzlabot audiopastaigu.",rating:"Piešķiriet 1–5 zvaigznes",scale:"1 = slikti · 5 = lieliski",comment:"Komentārs (neobligāts)",placeholder:"Kas jums patika vai ko varētu uzlabot?",submit:"Nosūtīt vērtējumu",thanks:"Paldies par atsauksmi!",error:"Neizdevās nosūtīt. Pārbaudiet savienojumu un mēģiniet vēlreiz.",privacy:"Anonīmi: saglabājam tikai valodu, laiku, vērtējumu un neobligātu komentāru. Neievadiet vārdus vai kontaktinformāciju."},
+ lt:{button:"Įvertinti pasivaikščiojimą",title:"Kaip jums apskritai patiko pasivaikščiojimas?",intro:"Jūsų atsiliepimas padeda tobulinti audiomaršrutą.",rating:"Skirkite 1–5 žvaigždutes",scale:"1 = prastai · 5 = puikiai",comment:"Komentaras (nebūtinas)",placeholder:"Kas patiko arba ką galėtume patobulinti?",submit:"Siųsti įvertinimą",thanks:"Ačiū už įvertinimą!",error:"Nepavyko išsiųsti. Patikrinkite ryšį ir bandykite dar kartą.",privacy:"Anonimiškai: saugome tik kalbą, laiką, įvertinimą ir neprivalomą komentarą. Nenurodykite vardų ar kontaktų."},
+ mt:{button:"Ivvaluta l-mixja",title:"B’mod ġenerali, kif għoġbitek il-mixja?",intro:"Il-feedback tiegħek jgħinna ntejbu l-mixja awdjo.",rating:"Agħti minn 1 sa 5 stilel",scale:"1 = ħażina · 5 = eċċellenti",comment:"Kumment (mhux obbligatorju)",placeholder:"X’għoġbok jew x’nistgħu ntejbu?",submit:"Ibgħat il-valutazzjoni",thanks:"Grazzi tal-feedback tiegħek!",error:"Ma rnexxilniex nibagħtu. Iċċekkja l-konnessjoni u erġa’ pprova.",privacy:"Anonimu: naħżnu biss il-lingwa, il-ħin, il-punteġġ u kumment mhux obbligatorju. Daħħalx ismijiet jew dettalji ta’ kuntatt."},
+ sk:{button:"Ohodnotiť prechádzku",title:"Ako sa vám prechádzka celkovo páčila?",intro:"Vaša spätná väzba nám pomôže zlepšiť audio prechádzku.",rating:"Dajte 1 až 5 hviezdičiek",scale:"1 = zlá · 5 = výborná",comment:"Komentár (voliteľný)",placeholder:"Čo sa vám páčilo alebo čo môžeme zlepšiť?",submit:"Odoslať hodnotenie",thanks:"Ďakujeme za hodnotenie!",error:"Odoslanie sa nepodarilo. Skontrolujte pripojenie a skúste znova.",privacy:"Anonymne: ukladáme iba jazyk, čas, hodnotenie a voliteľný komentár. Neuvádzajte mená ani kontaktné údaje."},
+ sl:{button:"Oceni sprehod",title:"Kako vam je bil sprehod na splošno všeč?",intro:"Vaše mnenje nam pomaga izboljšati zvočni sprehod.",rating:"Dodelite 1–5 zvezdic",scale:"1 = slabo · 5 = odlično",comment:"Komentar (neobvezno)",placeholder:"Kaj vam je bilo všeč ali kaj bi lahko izboljšali?",submit:"Pošlji oceno",thanks:"Hvala za vaše mnenje!",error:"Pošiljanje ni uspelo. Preverite povezavo in poskusite znova.",privacy:"Anonimno: shranimo samo jezik, čas, oceno in neobvezen komentar. Ne vnašajte imen ali kontaktnih podatkov."}
+};
+function feedbackText(){return feedbackUi[currentLang]||feedbackUi.en;}
+function updateFeedbackLabels(){
+ const t=feedbackText();
+ document.getElementById("openFeedback").textContent=t.button;
+ document.getElementById("feedbackTitle").textContent=t.title;
+ document.getElementById("feedbackIntro").textContent=t.intro;
+ document.getElementById("feedbackRatingLabel").textContent=t.rating;
+ document.getElementById("feedbackScale").textContent=t.scale;
+ document.getElementById("feedbackCommentLabel").textContent=t.comment;
+ document.getElementById("feedbackComment").placeholder=t.placeholder;
+ document.getElementById("feedbackSubmit").textContent=t.submit;
+ document.getElementById("feedbackPrivacy").textContent=t.privacy;
+ document.querySelectorAll(".rating-option input").forEach((el)=>{const n=Number(el.value);el.nextElementSibling.setAttribute("aria-label",`${n} ${currentLang==="nl"?(n===1?"ster":"sterren"):currentLang==="de"?(n===1?"Stern":"Sterne"):currentLang==="fr"?(n===1?"étoile":"étoiles"):"star"+(n===1?"":"s")}`);});
+}
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxEvwjFs6QIWo1nOAb9OSe4sq0DQHTCtiF5SSQVHI96MZPafkWHkVLo8p4I_KWQOvb5/exec";
+function recordInGoogleSheet(payload){
+ if(!GOOGLE_SHEETS_WEB_APP_URL || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(GOOGLE_SHEETS_WEB_APP_URL)) return Promise.reject(new Error("Google Sheets-koppeling is nog niet ingesteld."));
+ return fetch(GOOGLE_SHEETS_WEB_APP_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(payload),keepalive:true}).then(()=>true);
+}
+function recordLanguageUsage(lang){
+ try{
+  const now=new Date();
+  const day=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+  const key=`tholen-lang-count-${day}-${lang}`;
+  if(localStorage.getItem(key)==="1") return;
+  localStorage.setItem(key,"1");
+  recordInGoogleSheet({event:"language",lang:lang}).catch(()=>localStorage.removeItem(key));
+ }catch(e){}
+}
+function showFeedback(){
+ const section=document.getElementById("feedbackSection");
+ section.hidden=false;
+ section.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function distanceMeters(lat1,lon1,lat2,lon2){const r=x=>x*Math.PI/180;const a=Math.sin(r(lat2-lat1)/2)**2+Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(r(lon2-lon1)/2)**2;return 6371000*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+document.getElementById("navigateNearest").onclick=()=>{const b=document.getElementById("navigateNearest");if(!navigator.geolocation){alert("Deze browser ondersteunt geen GPS-locatie.");return;}const old=b.textContent;b.disabled=true;b.textContent="Locatie bepalen…";navigator.geolocation.getCurrentPosition(p=>{let nearest=null,nd=Infinity;for(const s of ROUTE_MAP_DATA.stops){const d=distanceMeters(p.coords.latitude,p.coords.longitude,s.lat,s.lon);if(d<nd){nearest=s;nd=d;}}b.disabled=false;b.textContent=old;if(nearest)location.href=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${nearest.lat},${nearest.lon}`)}&travelmode=walking`;},e=>{b.disabled=false;b.textContent=old;alert(e.code===1?"Locatietoegang geweigerd. Sta locatie toe om te navigeren.":"Je locatie kon niet worden bepaald. Controleer GPS en probeer opnieuw.");},{enableHighAccuracy:true,maximumAge:0,timeout:15000});};
+
+function setLang(lang){
+  langbar.classList.remove("open");
+  if(window.tholenAudio){window.tholenAudio.pause();window.tholenAudio=null;} currentLang=lang; localStorage.setItem("tholen-lang",lang);
+  document.documentElement.lang=lang;
+  document.querySelectorAll(".lang-options .lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  const chosen=LANGS.find(x=>x[0]===lang)||LANGS[0];
+  currentLangButton.innerHTML=`<span class="flag ${chosen[0]}" aria-hidden="true"></span><span>${chosen[1]}</span><span class="lang-arrow">▾</span>`;
+  const homeText=ui[lang]||ui.en;
+  document.getElementById("title").textContent=homeText[0];
+  document.getElementById("intro").textContent=homeText[1];
+  document.getElementById("subtitle").textContent=homeText[2];
+  document.getElementById("navigateNearest").textContent=navigateLabels[lang]||navigateLabels.en;
+  updateFeedbackLabels();
+  renderStops();
+}
+async function loadText(lang,nr){
+  if(window.THOLEN_TEXTS && window.THOLEN_TEXTS[lang] && window.THOLEN_TEXTS[lang][String(nr)]){
+    return window.THOLEN_TEXTS[lang][String(nr)];
+  }
+  try{
+    const r=await fetch(`teksten/${lang}/stop-${String(nr).padStart(2,"0")}.txt`);
+    if(!r.ok) throw new Error();
+    return (await r.text()).trim();
+  }catch(e){
+    return "Deze tekst is voor deze taal nog niet beschikbaar.";
+  }
+}
+async function renderStops(){
+  const box=document.getElementById("stops");
+  box.innerHTML="";
+  const cards=[];
+  for(const s of ROUTE_MAP_DATA.stops){
+    const card=document.createElement("article");
+    card.className="card";
+    card.innerHTML=`<div class="stophead"><div class="num">${s.nr}</div><div><div class="stoptitle">${s.title}</div><div class="small">Stop ${s.nr}</div></div></div><div class="small text">Tekst wordt geladen...</div><div class="stop-actions"><button class="btn play">Audio</button><button class="btn kaart">Op kaart</button></div>`;
+    box.appendChild(card);
+    cards.push([s,card]);
+    card.querySelector(".kaart").onclick=()=>{map.setView([s.lat,s.lon],18);stopMarkers[s.nr-1].openPopup();window.scrollTo({top:0,behavior:"smooth"})};
+    card.querySelector(".play").onclick=()=>playStop(s.nr,card);
+  }
+  await Promise.all(cards.map(async ([s,card])=>{
+    const t=await loadText(currentLang,s.nr);
+    card.querySelector(".text").textContent=t || "Historische halte van de wandeling.";
+  }));
+}
+let speech=null;
+function playStop(nr,card){
+  if(window.tholenAudio){try{window.tholenAudio.pause();}catch(e){}}
+  const lang=(typeof currentLang==="string"&&currentLang)?currentLang:"nl";
+  try{fetch("stats.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"audio_start",lang:lang,stop:nr})}).catch(()=>{});}catch(e){}
+  const src=`audio/${lang}/stop-${String(nr).padStart(2,"0")}.mp3`;
+  const player=new Audio(src);
+  window.tholenAudio=player;
+  player.play().catch(()=>{
+    let p=card.querySelector(".audio-fallback");
+    if(!p){
+      p=document.createElement("audio");
+      p.className="audio-fallback";
+      p.controls=true;
+      p.style.width="100%";
+      p.style.marginTop="10px";
+      card.querySelector(".stop-actions").after(p);
+    }
+    p.src=src;
+    p.play().catch(()=>{});
+  });
+}
+document.getElementById("openFeedback").addEventListener("click",showFeedback);
+document.getElementById("feedbackForm").addEventListener("submit",async function(e){e.preventDefault();const rating=document.querySelector('input[name="rating"]:checked');if(!rating){document.getElementById("feedbackStatus").textContent="Kies eerst een beoordeling.";return;}const b=document.getElementById("feedbackSubmit"),status=document.getElementById("feedbackStatus");b.disabled=true;status.textContent="";try{await recordInGoogleSheet({event:"feedback",lang:currentLang||"nl",rating:Number(rating.value),comment:document.getElementById("feedbackComment").value.slice(0,500)});status.textContent=feedbackText().thanks;document.getElementById("feedbackForm").reset();}catch(err){status.textContent=feedbackText().error;}finally{b.disabled=false;}});
+
+setLang(localStorage.getItem("tholen-lang")||"nl");
+map.fitBounds(bounds,{padding:[25,25]});
+
+// Privacyvriendelijke eigen teller: één bezoek per browser per dag.
+(function(){
+  try {
+    const key = "tholen_stats_last_visit";
+    const today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(key) !== today) {
+      localStorage.setItem(key, today);
+      fetch("stats.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({event:"visit", lang:currentLang || "nl"})
+      }).catch(()=>{});
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
