@@ -268,10 +268,102 @@ function loadApprovedReviews(){
  const script=document.createElement("script");script.src=PUBLIC_REVIEWS_WEB_APP_URL+"?action=reviews&callback="+callbackName+"&t="+Date.now();script.onerror=()=>{list.textContent="Reviews konden niet worden geladen.";delete window[callbackName];};document.head.appendChild(script);
 }
 
-function recordInGoogleSheet(payload){
- if(!GOOGLE_SHEETS_WEB_APP_URL || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(GOOGLE_SHEETS_WEB_APP_URL)) return Promise.reject(new Error("Google Sheets-koppeling is nog niet ingesteld."));
- return fetch(GOOGLE_SHEETS_WEB_APP_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(payload),keepalive:true}).then(()=>true);
+
+function recordInGoogleSheet(payload) {
+  if (
+    !GOOGLE_SHEETS_WEB_APP_URL ||
+    !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(GOOGLE_SHEETS_WEB_APP_URL)
+  ) {
+    return Promise.reject(
+      new Error("Google Sheets-koppeling is niet goed ingesteld.")
+    );
+  }
+
+  return new Promise((resolve, reject) => {
+    const token =
+      "tholen_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random().toString(36).slice(2, 12);
+
+    const frameName = "tholen_submit_" + token;
+    const frame = document.createElement("iframe");
+    frame.name = frameName;
+    frame.style.display = "none";
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = GOOGLE_SHEETS_WEB_APP_URL;
+    form.target = frameName;
+    form.style.display = "none";
+
+    for (const [name, value] of Object.entries({
+      transport: "iframe",
+      token: token,
+      payload: JSON.stringify(payload)
+    })) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    let finished = false;
+    let timeout;
+
+    function cleanup() {
+      window.removeEventListener("message", onMessage);
+      clearTimeout(timeout);
+      form.remove();
+      frame.remove();
+    }
+
+    function finish(callback, value) {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      callback(value);
+    }
+
+    function onMessage(event) {
+      const data = event.data;
+      if (
+        !data ||
+        data.channel !== "THOLEN_STATS" ||
+        data.token !== token ||
+        !data.payload ||
+        data.payload.phase !== "submit"
+      ) return;
+
+      if (data.payload.result && data.payload.result.ok) {
+        finish(resolve, true);
+      } else {
+        finish(
+          reject,
+          new Error(
+            data.payload.result?.error ||
+            "De reviewserver heeft de inzending niet bevestigd."
+          )
+        );
+      }
+    }
+
+    window.addEventListener("message", onMessage);
+
+    timeout = setTimeout(() => {
+      finish(
+        reject,
+        new Error("Geen bevestiging van de reviewserver ontvangen.")
+      );
+    }, 20000);
+
+    document.body.appendChild(frame);
+    document.body.appendChild(form);
+    form.submit();
+  });
 }
+
 // Voor reviews gebruiken we de status-API van het Apps Script; no-cors is hiervoor onvoldoende.
 function reviewJsonp(params){
  return new Promise((resolve,reject)=>{
