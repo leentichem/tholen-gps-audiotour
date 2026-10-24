@@ -482,22 +482,71 @@ function playStop(nr,card){
 }
 document.getElementById("openFeedback").addEventListener("click",()=>showFeedback(false));
 document.getElementById("openReview").addEventListener("click",()=>showFeedback(true));
-document.getElementById("feedbackForm").addEventListener("submit",async function(e){
- e.preventDefault();
- const rating=document.querySelector('input[name="rating"]:checked');
- const reviewText=document.getElementById("feedbackComment").value.trim();
- const status=document.getElementById("feedbackStatus");
- if(!rating && !reviewText){status.textContent="Kies sterren of schrijf eerst een review.";return;}
- const b=document.getElementById("feedbackSubmit");b.disabled=true;status.textContent="";
- try{
-  if(reviewText.length>500)throw new Error("De review mag maximaal 500 tekens bevatten.");
-  if(rating) await recordInGoogleSheet({event:"feedback",lang:currentLang||"nl",rating:Number(rating.value),comment:""});
-  if(reviewText){status.textContent="Review wordt verzonden…";await submitReviewAndWait(currentLang||"nl",reviewText);status.textContent="Bedankt! Je review is opgeslagen en wacht op goedkeuring voordat deze openbaar wordt.";}
-  else status.textContent=feedbackText().thanks;
-  document.getElementById("feedbackForm").reset();
- }catch(err){status.textContent=err&&err.message?err.message:feedbackText().error;}
- finally{b.disabled=false;}
+
+document.getElementById("feedbackForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const rating = document.querySelector('input[name="rating"]:checked');
+  const reviewText = document.getElementById("feedbackComment").value.trim();
+  const status = document.getElementById("feedbackStatus");
+  const button = document.getElementById("feedbackSubmit");
+
+  if (!rating && !reviewText) {
+    status.textContent = "Kies sterren of schrijf eerst een review.";
+    return;
+  }
+
+  if (reviewText.length > 500) {
+    status.textContent = "De review mag maximaal 500 tekens bevatten.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "";
+
+  let reviewSaved = false;
+
+  try {
+    if (reviewText) {
+      status.textContent = "Review wordt verzonden…";
+      await submitReviewAndWait(currentLang || "nl", reviewText);
+      reviewSaved = true;
+    }
+
+    if (rating) {
+      try {
+        await recordInGoogleSheet({
+          event: "feedback",
+          lang: currentLang || "nl",
+          rating: Number(rating.value),
+          comment: ""
+        });
+      } catch (ratingError) {
+        if (!reviewSaved) throw ratingError;
+
+        status.textContent =
+          "Je review is opgeslagen en wacht op goedkeuring. " +
+          "De bevestiging van de sterrenbeoordeling bleef uit.";
+        document.getElementById("feedbackForm").reset();
+        return;
+      }
+    }
+
+    status.textContent = reviewSaved
+      ? "Bedankt! Je review is opgeslagen en wacht op goedkeuring voordat deze openbaar wordt."
+      : feedbackText().thanks;
+
+    document.getElementById("feedbackForm").reset();
+
+  } catch (err) {
+    status.textContent = err && err.message
+      ? err.message
+      : feedbackText().error;
+  } finally {
+    button.disabled = false;
+  }
 });
+
 
 setLang(localStorage.getItem("tholen-lang")||"nl");
 loadApprovedReviews();
