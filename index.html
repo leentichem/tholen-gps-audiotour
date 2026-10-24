@@ -415,7 +415,8 @@ async function submitFeedbackAndWait(lang, rating) {
 
   return result;
 }
- try{
+function recordLanguageUsage(lang){
+  try{
   const now=new Date();
   const day=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
   const key=`tholen-lang-count-${day}-${lang}`;
