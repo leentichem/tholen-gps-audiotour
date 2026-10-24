@@ -392,7 +392,50 @@ async function submitReviewAndWait(lang,reviewText){
  }
  throw new Error("De review is ontvangen, maar de spreadsheet heeft de opslag nog niet bevestigd. Probeer niet meteen opnieuw; controleer eerst het tabblad Reviews.");
 }
-function recordLanguageUsage(lang){
+async function submitFeedbackAndWait(lang, rating) {
+  const requestId = "feedback_" + Date.now().toString(36) +
+    "_" + Math.random().toString(36).slice(2, 9);
+
+  const queued = await reviewJsonp({
+    action: "submit",
+    requestId: requestId,
+    event: "feedback",
+    lang: lang || "nl",
+    rating: Number(rating),
+    comment: ""
+  });
+
+  if (!queued || queued.ok !== true || !queued.queued) {
+    throw new Error(
+      queued && queued.error
+        ? queued.error
+        : "De sterrenbeoordeling is niet ontvangen."
+    );
+  }
+
+  const deadline = Date.now() + 75000;
+
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const result = await reviewJsonp({
+      action: "status",
+      statusId: requestId
+    });
+
+    if (result && result.ok === true && result.saved === true) {
+      return result;
+    }
+
+    if (result && result.ok === false && result.error) {
+      throw new Error(result.error);
+    }
+  }
+
+  throw new Error(
+    "De sterrenbeoordeling is ontvangen, maar de opslag is nog niet bevestigd. Controleer eerst het tabblad Inzendingen."
+  );
+}function recordLanguageUsage(lang){
  try{
   const now=new Date();
   const day=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
@@ -515,12 +558,10 @@ document.getElementById("feedbackForm").addEventListener("submit", async functio
 
     if (rating) {
       try {
-        await recordInGoogleSheet({
-          event: "feedback",
-          lang: currentLang || "nl",
-          rating: Number(rating.value),
-          comment: ""
-        });
+     await submitFeedbackAndWait(
+  currentLang || "nl",
+  Number(rating.value)
+);   
       } catch (ratingError) {
         if (!reviewSaved) throw ratingError;
 
