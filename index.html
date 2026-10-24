@@ -396,7 +396,7 @@ async function submitFeedbackAndWait(lang, rating) {
   const requestId = "feedback_" + Date.now().toString(36) +
     "_" + Math.random().toString(36).slice(2, 9);
 
-  const queued = await reviewJsonp({
+  const result = await reviewJsonp({
     action: "submit",
     requestId: requestId,
     event: "feedback",
@@ -405,37 +405,16 @@ async function submitFeedbackAndWait(lang, rating) {
     comment: ""
   });
 
-  if (!queued || queued.ok !== true || !queued.queued) {
+  if (!result || result.ok !== true || result.queued !== true) {
     throw new Error(
-      queued && queued.error
-        ? queued.error
-        : "De sterrenbeoordeling is niet ontvangen."
+      result && result.error
+        ? result.error
+        : "De sterrenbeoordeling kon niet worden aangenomen."
     );
   }
 
-  const deadline = Date.now() + 75000;
-
-  while (Date.now() < deadline) {
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const result = await reviewJsonp({
-      action: "status",
-      statusId: requestId
-    });
-
-    if (result && result.ok === true && result.saved === true) {
-      return result;
-    }
-
-    if (result && result.ok === false && result.error) {
-      throw new Error(result.error);
-    }
-  }
-
-  throw new Error(
-    "De sterrenbeoordeling is ontvangen, maar de opslag is nog niet bevestigd. Controleer eerst het tabblad Inzendingen."
-  );
-}function recordLanguageUsage(lang){
+  return result;
+}
  try{
   const now=new Date();
   const day=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
