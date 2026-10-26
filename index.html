@@ -260,52 +260,94 @@ function updateFeedbackLabels(){
 const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxEvwjFs6QIWo1nOAb9OSe4sq0DQHTCtiF5SSQVHI96MZPafkWHkVLo8p4I_KWQOvb5/exec";
 // Vul na publicatie van het aparte Apps Script de nieuwe /exec-URL hieronder in.
 const PUBLIC_REVIEWS_WEB_APP_URL = GOOGLE_SHEETS_WEB_APP_URL;
-function loadApprovedReviews(){
- const list=document.getElementById("reviewsList");
- if(!PUBLIC_REVIEWS_WEB_APP_URL.startsWith("https://script.google.com/macros/s/") || !PUBLIC_REVIEWS_WEB_APP_URL.endsWith("/exec")){list.innerHTML="<p>De openbare reviewfunctie wordt nog ingesteld.</p>";return;}
- const callbackName="tholenCallback_reviews";
- window[callbackName]=function(data){
-   delete window[callbackName];
-  ```js
-const reviews = data && Array.isArray(data.reviews)
-  ? data.reviews
-  : data && data.reviews && Array.isArray(data.reviews.reviews)
-    ? data.reviews.reviews
-    : null;
+}```javascript
+function loadApprovedReviews() {
+  const list = document.getElementById("reviewsList");
+  if (!list) return;
 
-if (!data || data.ok !== true || !reviews) {
-  list.textContent = "Reviews konden niet worden geladen.";
-  return;
+  list.textContent = "Reviews laden…";
+
+  const token = "reviews_" + Date.now() + "_" +
+    Math.random().toString(36).slice(2);
+
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.setAttribute("aria-hidden", "true");
+
+  let finished = false;
+  let timeout;
+
+  function cleanup() {
+    window.removeEventListener("message", onMessage);
+    clearTimeout(timeout);
+    iframe.remove();
+  }
+
+  function fail() {
+    if (finished) return;
+    finished = true;
+    cleanup();
+    list.textContent = "Reviews konden niet worden geladen.";
+  }
+
+  function onMessage(event) {
+    const message = event.data;
+
+    if (
+      !message ||
+      message.channel !== "THOLEN_STATS" ||
+      message.token !== token ||
+      !message.payload ||
+      message.payload.phase !== "reviews"
+    ) return;
+
+    if (finished) return;
+
+    const data = message.payload.result;
+
+    if (!data || data.ok !== true || !Array.isArray(data.reviews)) {
+      fail();
+      return;
+    }
+
+    finished = true;
+    cleanup();
+    list.replaceChildren();
+
+    if (data.reviews.length === 0) {
+      const p = document.createElement("p");
+      p.textContent = "Er zijn nog geen gepubliceerde reviews.";
+      list.appendChild(p);
+      return;
+    }
+
+    data.reviews.forEach(function (r) {
+      const article = document.createElement("article");
+      article.className = "review-item";
+
+      const meta = document.createElement("div");
+      meta.className = "review-meta";
+      meta.textContent = String(r.lang || "").toUpperCase();
+
+      const body = document.createElement("div");
+      body.className = "review-body";
+      body.textContent = String(r.text || "");
+
+      article.append(meta, body);
+      list.appendChild(article);
+    });
+  }
+
+  timeout = setTimeout(fail, 20000);
+  window.addEventListener("message", onMessage);
+
+  iframe.src = GOOGLE_SHEETS_WEB_APP_URL +
+    "?action=reviews&transport=iframe&token=" +
+    encodeURIComponent(token);
+
+  document.body.appendChild(iframe);
 }
-
-list.replaceChildren();
-
-if (!reviews.length) {
-  const p = document.createElement("p");
-  p.textContent = "Er zijn nog geen gepubliceerde reviews.";
-  list.appendChild(p);
-  return;
-}
-
-reviews.forEach(r => {
-  const article = document.createElement("article");
-  article.className = "review-item";
-
-  const meta = document.createElement("div");
-  meta.className = "review-meta";
-  meta.textContent = String(r.lang || "").toUpperCase();
-
-  const body = document.createElement("div");
-  body.className = "review-body";
-  body.textContent = String(r.text || "");
-
-  article.append(meta, body);
-  list.appendChild(article);
-});
 ```
- };
- const script=document.createElement("script");script.src=PUBLIC_REVIEWS_WEB_APP_URL+"?action=reviews&callback="+callbackName+"&t="+Date.now();script.onerror=()=>{list.textContent="Reviews konden niet worden geladen.";delete window[callbackName];};document.head.appendChild(script);
-}
 
 
 function recordInGoogleSheet(payload) {
