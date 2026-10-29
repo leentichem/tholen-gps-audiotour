@@ -461,17 +461,12 @@ function reviewJsonp(params){
 }
 async function submitReviewAndWait(lang,reviewText){
  const requestId="review_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);
- const queued=await reviewJsonp({action:"submit",requestId,event:"review",lang,reviewText});
- if(!queued || queued.ok!==true || !queued.queued) throw new Error(queued&&queued.error?queued.error:"De review is niet geaccepteerd.");
- // De bestaande Apps Script-trigger verwerkt de wachtrij elke minuut; wacht maximaal 75 seconden.
- const deadline=Date.now()+75000;
- while(Date.now()<deadline){
-  await new Promise(resolve=>setTimeout(resolve,3000));
-  const result=await reviewJsonp({action:"status",statusId:requestId});
-  if(result && result.ok===true && result.saved===true) return result;
-  if(result && result.ok===false && result.error) throw new Error(result.error);
+ const result=await reviewJsonp({action:"submit",requestId,event:"review",lang,reviewText});
+ // De nieuwe server slaat direct op; geen oude wachtrij/status-trigger meer gebruiken.
+ if(!result || result.ok!==true || result.saved!==true){
+   throw new Error(result && result.error ? result.error : "De reviewserver heeft de opslag niet bevestigd.");
  }
- throw new Error("De review is ontvangen, maar de spreadsheet heeft de opslag nog niet bevestigd. Probeer niet meteen opnieuw; controleer eerst het tabblad Reviews.");
+ return result;
 }
 async function submitFeedbackAndWait(lang, rating) {
   const requestId = "feedback_" + Date.now().toString(36) +
