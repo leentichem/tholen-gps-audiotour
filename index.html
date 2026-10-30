@@ -261,59 +261,26 @@ const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzX1T
 // Vul na publicatie van het aparte Apps Script de nieuwe /exec-URL hieronder in.
 const PUBLIC_REVIEWS_WEB_APP_URL = GOOGLE_SHEETS_WEB_APP_URL;
 
-function loadApprovedReviews() {
+async function loadApprovedReviews() {
   const list = document.getElementById("reviewsList");
   if (!list) return;
 
   list.textContent = "Reviews laden…";
-
-  const token = "reviews_" + Date.now() + "_" +
-    Math.random().toString(36).slice(2);
-
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.setAttribute("aria-hidden", "true");
-
-  let finished = false;
-  let timeout;
-
-  function cleanup() {
-    window.removeEventListener("message", onMessage);
-    clearTimeout(timeout);
-    iframe.remove();
-  }
-
-  function fail() {
-    if (finished) return;
-    finished = true;
-    cleanup();
-    list.textContent = "Reviews konden niet worden geladen.";
-  }
-
-  function onMessage(event) {
-    const message = event.data;
-
-    if (
-      !message ||
-      message.channel !== "THOLEN_STATS" ||
-      message.token !== token ||
-      !message.payload ||
-      message.payload.phase !== "reviews"
-    ) return;
-
-    if (finished) return;
-
-    const data = message.payload.result;
-
+  try {
+    // Probeer eerst JSONP. Als de browser/redirect dat blokkeert, val terug
+    // op het iframe-transport dat de Apps Script-server ook ondersteunt.
+    let data;
+    try {
+      data = await reviewJsonp({ action: "reviews" });
+    } catch (jsonpError) {
+      console.warn("Tholen reviews: JSONP mislukt; iframe-fallback wordt geprobeerd.", jsonpError);
+      data = await loadReviewsViaIframe();
+    }
     if (!data || data.ok !== true || !Array.isArray(data.reviews)) {
-      fail();
-      return;
+      throw new Error(data && data.error ? data.error : "Ongeldig antwoord van de reviewserver.");
     }
 
-    finished = true;
-    cleanup();
     list.replaceChildren();
-
     if (data.reviews.length === 0) {
       const p = document.createElement("p");
       p.textContent = "Er zijn nog geen gepubliceerde reviews.";
@@ -324,30 +291,20 @@ function loadApprovedReviews() {
     data.reviews.forEach(function (r) {
       const article = document.createElement("article");
       article.className = "review-item";
-
       const meta = document.createElement("div");
       meta.className = "review-meta";
       meta.textContent = String(r.lang || "").toUpperCase();
-
       const body = document.createElement("div");
       body.className = "review-body";
       body.textContent = String(r.text || "");
-
       article.append(meta, body);
       list.appendChild(article);
     });
+  } catch (error) {
+    list.textContent = "Reviews konden niet worden geladen. Controleer de reviewserver.";
+    console.error("Tholen reviews laden mislukt:", error);
   }
-
-  timeout = setTimeout(fail, 20000);
-  window.addEventListener("message", onMessage);
-
-  iframe.src = GOOGLE_SHEETS_WEB_APP_URL +
-    "?action=reviews&transport=iframe&token=" +
-    encodeURIComponent(token);
-
-  document.body.appendChild(iframe);
 }
-
 
 
 function recordInGoogleSheet(payload) {
@@ -442,6 +399,41 @@ function recordInGoogleSheet(payload) {
     document.body.appendChild(frame);
     document.body.appendChild(form);
     form.submit();
+  });
+}
+
+// Terugvalroute voor browsers/netwerkredirects die JSONP niet goed verwerken.
+function loadReviewsViaIframe() {
+  return new Promise((resolve, reject) => {
+    const token = "tholen_reviews_" + Date.now().toString(36) + "_" +
+      Math.random().toString(36).slice(2, 12);
+    const frame = document.createElement("iframe");
+    frame.style.display = "none";
+    let finished = false;
+    const cleanup = () => {
+      window.removeEventListener("message", onMessage);
+      clearTimeout(timeout);
+      frame.remove();
+    };
+    const finish = (fn, value) => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      fn(value);
+    };
+    const onMessage = (event) => {
+      const data = event.data;
+      if (!data || data.channel !== "THOLEN_STATS" || data.token !== token ||
+          !data.payload || data.payload.phase !== "reviews") return;
+      finish(resolve, data.payload.result);
+    };
+    window.addEventListener("message", onMessage);
+    const timeout = setTimeout(() => {
+      finish(reject, new Error("Ook de iframe-verbinding met de reviewserver gaf geen antwoord."));
+    }, 12000);
+    const query = new URLSearchParams({ action: "reviews", transport: "iframe", token });
+    frame.src = PUBLIC_REVIEWS_WEB_APP_URL + "?" + query.toString();
+    document.body.appendChild(frame);
   });
 }
 
