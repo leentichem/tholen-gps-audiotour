@@ -257,7 +257,7 @@ function updateFeedbackLabels(){
  document.getElementById("feedbackPrivacy").textContent=t.privacy;
  document.querySelectorAll(".rating-option input").forEach((el)=>{const n=Number(el.value);el.nextElementSibling.setAttribute("aria-label",`${n} ${currentLang==="nl"?(n===1?"ster":"sterren"):currentLang==="de"?(n===1?"Stern":"Sterne"):currentLang==="fr"?(n===1?"étoile":"étoiles"):"star"+(n===1?"":"s")}`);});
 }
-const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyuVVZ7c-roxD7zP61Wj3bProdyxO5b1sKfj41o_dM738cjjuQnsXc0PbLngMj4G-GM/exec";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzX1TiiG_caF6EniY3bAb9VrUo-T9e5MnztJ54VPRztE9Nr597PLwzXsx8hw0JjM9GG/exec";
 // Vul na publicatie van het aparte Apps Script de nieuwe /exec-URL hieronder in.
 const PUBLIC_REVIEWS_WEB_APP_URL = GOOGLE_SHEETS_WEB_APP_URL;
 
