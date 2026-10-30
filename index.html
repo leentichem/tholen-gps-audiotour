@@ -276,9 +276,14 @@ async function loadApprovedReviews() {
       console.warn("Tholen reviews: JSONP mislukt; iframe-fallback wordt geprobeerd.", jsonpError);
       data = await loadReviewsViaIframe();
     }
-    if (!data || data.ok !== true || !Array.isArray(data.reviews)) {
-      throw new Error(data && data.error ? data.error : "Ongeldig antwoord van de reviewserver.");
-    }
+if (data && data.ok === true && data.reviews &&
+    !Array.isArray(data.reviews) &&
+    Array.isArray(data.reviews.reviews)) {
+  data.reviews = data.reviews.reviews;
+}
+if (!data || data.ok !== true || !Array.isArray(data.reviews)) {
+  throw new Error(data && data.error ? data.error : "Ongeldig antwoord van de reviewserver.");
+}
 
     list.replaceChildren();
     if (data.reviews.length === 0) {
