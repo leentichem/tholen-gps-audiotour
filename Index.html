@@ -270,6 +270,11 @@ async function loadApprovedReviews() {
     // Gebruik dezelfde JSONP-verbinding als bij het opslaan van reviews.
     // Dit vermijdt problemen met verborgen iframe/postMessage-verkeer.
     const data = await reviewJsonp({ action: "reviews" });
+    if (data && data.ok === true && data.reviews &&
+    !Array.isArray(data.reviews) &&
+    Array.isArray(data.reviews.reviews)) {
+  data.reviews = data.reviews.reviews;
+}
     if (!data || data.ok !== true || !Array.isArray(data.reviews)) {
       throw new Error(data && data.error ? data.error : "Ongeldig antwoord van de reviewserver.");
     }
