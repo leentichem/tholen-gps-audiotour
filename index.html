@@ -271,10 +271,10 @@ async function loadApprovedReviews() {
     // op het iframe-transport dat de Apps Script-server ook ondersteunt.
     let data;
     try {
-     data = await loadReviewsViaIframe();
+    data = await reviewJsonp({ action: "reviews" }); 
     } catch (jsonpError) {
       console.warn("Tholen reviews: JSONP mislukt; iframe-fallback wordt geprobeerd.", jsonpError);
-      data = await loadReviewsViaIframe();
+    data = await loadReviewsViaIframe(); 
     }
 if (data && data.ok === true && data.reviews &&
     !Array.isArray(data.reviews) &&
