@@ -257,7 +257,7 @@ function updateFeedbackLabels(){
  document.getElementById("feedbackPrivacy").textContent=t.privacy;
  document.querySelectorAll(".rating-option input").forEach((el)=>{const n=Number(el.value);el.nextElementSibling.setAttribute("aria-label",`${n} ${currentLang==="nl"?(n===1?"ster":"sterren"):currentLang==="de"?(n===1?"Stern":"Sterne"):currentLang==="fr"?(n===1?"étoile":"étoiles"):"star"+(n===1?"":"s")}`);});
 }
-const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzX1TiiG_caF6EniY3bAb9VrUo-T9e5MnztJ54VPRztE9Nr597PLwzXsx8hw0JjM9GG/exec";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRoerJBz70p3pGOwdUGW-ciwwErq1iANxqqb-odNmwdwlro3Z9Mo8T6018bIPcYSE/exec";
 // Vul na publicatie van het aparte Apps Script de nieuwe /exec-URL hieronder in.
 const PUBLIC_REVIEWS_WEB_APP_URL = GOOGLE_SHEETS_WEB_APP_URL;
 
@@ -271,7 +271,7 @@ async function loadApprovedReviews() {
     // op het iframe-transport dat de Apps Script-server ook ondersteunt.
     let data;
     try {
-      data = await reviewIframeRequest();
+     data = await loadReviewsViaIframe();
     } catch (jsonpError) {
       console.warn("Tholen reviews: JSONP mislukt; iframe-fallback wordt geprobeerd.", jsonpError);
       data = await loadReviewsViaIframe();
